@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#0f172a"/>
 <title>GarageOS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -338,6 +339,47 @@ function OfferteForm({customers,onSave,onCancel}){
 }
 
 // ── OFFERTE DETAIL ────────────────────────────────────────────────────────────
+
+// ── EXCEL EXPORT ──────────────────────────────────────────────────────────────
+function exportOfferteExcel(offerte, customer){
+  const wb = XLSX.utils.book_new();
+  const firmaName = "Stucki Repair Shop";
+  const datum = new Date(offerte.createdAt).toLocaleDateString("de-CH");
+  const gueltigBis = offerte.gueltigBis ? new Date(offerte.gueltigBis).toLocaleDateString("de-CH") : "–";
+  const wsData = [
+    [firmaName, "", "", ""],
+    ["", "", "", ""],
+    ["OFFERTE", "", "", "Offerte #" + offerte.offertNumber],
+    ["Datum:", datum, "", "Gültig bis: " + gueltigBis],
+    ["", "", "", ""],
+    ["KUNDE", "", "", ""],
+    ["Name:", customer ? (customer.vorname + " " + customer.nachname) : "–", "", ""],
+    ["Telefon:", customer ? customer.telefon : "–", "", ""],
+    ["Fahrzeug:", customer ? ((customer.marke||"") + " " + (customer.modell||"")).trim() || "–" : "–", "", ""],
+    ["Kennzeichen:", customer ? customer.kennzeichen : "–", "", ""],
+    ["", "", "", ""],
+    ["POSITIONEN", "", "", ""],
+    ["Beschreibung", "Menge", "Preis CHF", "Total CHF"],
+  ];
+  (offerte.positionen || []).forEach(function(pos){
+    const menge = parseFloat(pos.menge || 1);
+    const preis = parseFloat(pos.preis || 0);
+    wsData.push([pos.beschreibung, menge, preis.toFixed(2), (menge * preis).toFixed(2)]);
+  });
+  wsData.push(["", "", "", ""]);
+  wsData.push(["", "", "TOTAL CHF:", parseFloat(offerte.totalBetrag || 0).toFixed(2)]);
+  if(offerte.notizen){
+    wsData.push(["", "", "", ""]);
+    wsData.push(["Notizen:", offerte.notizen, "", ""]);
+  }
+  wsData.push(["", "", "", ""]);
+  wsData.push(["", "", "", "Unterschrift: ____________________"]);
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws["!cols"] = [{wch:32},{wch:10},{wch:14},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws, "Offerte");
+  XLSX.writeFile(wb, "Offerte_" + offerte.offertNumber + "_" + (customer ? customer.nachname : "Kunde") + ".xlsx");
+}
+
 function OfferteDetail({offerte,customer,onClose,onUpdate,onDelete}){
   const[saving,setSaving]=useState(false);
   const stColors={entwurf:{c:"#6366f1",bg:"#eef2ff",l:"Entwurf"},versendet:{c:"#f59e0b",bg:"#fffbeb",l:"Versendet"},angenommen:{c:"#10b981",bg:"#ecfdf5",l:"Angenommen"},abgelehnt:{c:"#ef4444",bg:"#fee2e2",l:"Abgelehnt"}};
@@ -394,7 +436,8 @@ function OfferteDetail({offerte,customer,onClose,onUpdate,onDelete}){
       , offerte.notizen&&React.createElement('div', { style: {background:"#f8fafc",borderRadius:10,padding:"10px 12px",fontSize:13,color:"#475569",border:"1px solid #e2e8f0",marginBottom:14},}
         , React.createElement('strong', null, "Notizen:"), " ", offerte.notizen
       )
-      , React.createElement('button', { onClick: async()=>{if(window.confirm("Offerte wirklich löschen?"))await onDelete(offerte.id);}, style: {width:"100%",background:"#fee2e2",color:"#ef4444",border:"none",borderRadius:12,padding:"13px",fontWeight:700,cursor:"pointer",fontSize:15,marginTop:8},}, "🗑️ Offerte löschen")
+      , React.createElement('button', { onClick: ()=>exportOfferteExcel(offerte, customer), style: {width:"100%",background:"#16a34a",color:"#fff",border:"none",borderRadius:12,padding:"13px",fontWeight:700,cursor:"pointer",fontSize:15,marginTop:8,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:8},}, "📊 Excel herunterladen")
+      , React.createElement('button', { onClick: async()=>{if(window.confirm("Offerte wirklich löschen?"))await onDelete(offerte.id);}, style: {width:"100%",background:"#fee2e2",color:"#ef4444",border:"none",borderRadius:12,padding:"13px",fontWeight:700,cursor:"pointer",fontSize:15},}, "🗑️ Offerte löschen")
       , React.createElement('div', { style: {marginTop:14,fontSize:11,color:"#94a3b8"},}, "Erstellt: ", new Date(offerte.createdAt).toLocaleDateString("de-CH"), " · Offerte #", offerte.offertNumber)
     )
   );
@@ -694,11 +737,11 @@ function App(){
     if(!token||!authChecked)return;
     (async()=>{
       try{
-        const[cr,or,cnt,offr]=await Promise.all([db.get("customers",token),db.get("orders",token),db.getCounter(token),db.get("offerten",token)]);
+        const[cr,or,cnt,offr]=await Promise.all([db.get("customers",token),db.get("orders",token),db.getCounter(token),db.get("offerten",token).catch(()=>([]))]);
         setCustomers((Array.isArray(cr)?cr:[]).map(r=>r.data));
         setOrders((Array.isArray(or)?or:[]).map(r=>r.data));
         setOrderNum(cnt);
-        const offs=(Array.isArray(offr)?offr:[]).map(r=>r.data);
+        const offs=(Array.isArray(offr)?offr:[]).map(r=>r.data).filter(Boolean);
         setOfferten(offs);
         if(offs.length)setOffertNum(Math.max(...offs.map(o=>o.offertNumber||0)));
       }catch(e){console.error(e);}
