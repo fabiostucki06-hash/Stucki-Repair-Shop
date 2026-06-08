@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -33,19 +34,19 @@ button{touch-action:manipulation}
 <div id="root"></div>
 <script>
  function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }const{useState,useEffect,useRef}=React;
-
+ 
 // ── CONFIG ───────────────────────────────────────────────────────────────────
 const SUPA_URL="https://xpggpkmqwescbcrnnpod.supabase.co";
 const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZ2dwa21xd2VzY2Jjcm5ucG9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjIxMjIsImV4cCI6MjA5NjEzODEyMn0.egPJ4OYOegRKIBV6PHUz_VfRib8g7sVIcNNy_7bFxjg";
 const ADMIN_EMAIL="fabio.stucki06@gmail.com";
-
+ 
 // ── SUPABASE API ─────────────────────────────────────────────────────────────
 const h=(token)=>({
   "Content-Type":"application/json",
   "apikey":SUPA_KEY,
   "Authorization":`Bearer ${token||SUPA_KEY}`
 });
-
+ 
 const auth={
   async signUp(email,password){
     const r=await fetch(`${SUPA_URL}/auth/v1/signup`,{method:"POST",headers:h(),body:JSON.stringify({email,password})});
@@ -63,7 +64,7 @@ const auth={
     return r.json();
   }
 };
-
+ 
 const db={
   async get(table,token){
     const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*`,{headers:h(token)});
@@ -84,7 +85,7 @@ const db={
     await fetch(`${SUPA_URL}/rest/v1/counters?id=eq.orderNum`,{method:"PATCH",headers:h(token),body:JSON.stringify({value:val})});
   }
 };
-
+ 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const SC={
   aufnahme:{label:"Aufnahme",short:"Aufnahme",color:"#6366f1",bg:"#eef2ff"},
@@ -112,11 +113,11 @@ const getActiveStatus=(orders,cid)=>{
   if(!a.length)return null;
   return a.sort((x,y)=>new Date(y.createdAt)-new Date(x.createdAt))[0].status;
 };
-
+ 
 // ── SHARED STYLES ────────────────────────────────────────────────────────────
 const inp={padding:"12px",border:"1.5px solid #e2e8f0",borderRadius:10,fontSize:"16px",background:"#f8fafc",outline:"none",width:"100%",display:"block",WebkitAppearance:"none"};
 const lbl={display:"block",fontSize:11,fontWeight:700,color:"#64748b",marginBottom:5,textTransform:"uppercase",letterSpacing:0.5};
-
+ 
 function Badge({status,small}){
   const c=SC[status]||SC.aufnahme;
   return React.createElement('span', { style: {background:c.bg,color:c.color,border:`1px solid ${c.color}30`,borderRadius:20,padding:small?"1px 8px":"3px 10px",fontSize:small?10:11,fontWeight:700,whiteSpace:"nowrap",display:"inline-block"},}, small?c.short:c.label);
@@ -129,7 +130,7 @@ function Spinner({text="Wird geladen…"}){
     )
   );
 }
-
+ 
 // ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 function LoginPage({onLogin}){
     const[email,setEmail]=useState("");
@@ -137,7 +138,7 @@ function LoginPage({onLogin}){
   const[loading,setLoading]=useState(false);
   const[error,setError]=useState("");
   const[success,setSuccess]=useState("");
-
+ 
   async function handleLogin(){
     if(!email.trim()||!password.trim())return setError("Bitte alle Felder ausfüllen.");
     setLoading(true);setError("");
@@ -155,7 +156,7 @@ function LoginPage({onLogin}){
     }
     setLoading(false);
   }
-
+ 
   return(
     React.createElement('div', { style: {minHeight:"100dvh",background:"linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:16},}
       , React.createElement('div', { style: {width:"100%",maxWidth:400,animation:"fadeIn 0.4s ease"},}
@@ -165,13 +166,13 @@ function LoginPage({onLogin}){
           , React.createElement('h1', { style: {color:"#fff",fontWeight:900,fontSize:28,letterSpacing:-1},}, "GarageOS")
           , React.createElement('p', { style: {color:"#94a3b8",fontSize:14,marginTop:4},}, "Werkstatt Management System"  )
         )
-
+ 
         /* Card */
         , React.createElement('div', { style: {background:"#fff",borderRadius:20,padding:"28px 24px",boxShadow:"0 24px 64px rgba(0,0,0,0.4)"},}
           , React.createElement('h2', { style: {fontSize:18,fontWeight:800,color:"#0f172a",marginBottom:20,textAlign:"center"},}, "Anmelden")
-
+ 
           , error&&React.createElement('div', { style: {background:"#fee2e2",border:"1px solid #fca5a5",borderRadius:10,padding:"10px 14px",marginBottom:14,color:"#dc2626",fontWeight:600,fontSize:13},}, "⚠️ " , error)
-
+ 
           , React.createElement('div', { style: {marginBottom:14},}
             , React.createElement('label', { style: lbl,}, "E-Mail")
             , React.createElement('input', { type: "email", value: email, onChange: e=>setEmail(e.target.value), placeholder: "deine@email.ch",
@@ -182,7 +183,7 @@ function LoginPage({onLogin}){
             , React.createElement('input', { type: "password", value: password, onChange: e=>setPassword(e.target.value), placeholder: "••••••••",
               style: {...inp,borderColor:"#e2e8f0"}, onKeyDown: e=>e.key==="Enter"&&handleLogin(),})
           )
-
+ 
           , React.createElement('button', { onClick: handleLogin, disabled: loading,
             style: {width:"100%",background:loading?"#a5b4fc":"#6366f1",color:"#fff",border:"none",borderRadius:12,padding:"15px",fontWeight:800,cursor:"pointer",fontSize:16,boxShadow:"0 4px 16px rgba(99,102,241,0.4)"},}
             , loading?"Bitte warten…":"🔑 Anmelden"
@@ -192,7 +193,7 @@ function LoginPage({onLogin}){
     )
   );
 }
-
+ 
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 function Modal({title,onClose,children,full}){
   useEffect(()=>{
@@ -214,7 +215,7 @@ function Modal({title,onClose,children,full}){
     )
   );
 }
-
+ 
 // ── FIELD ─────────────────────────────────────────────────────────────────────
 function Field({label,value,onChange,placeholder,required,type="text"}){
   const[focus,setFocus]=useState(false);
@@ -238,7 +239,7 @@ function FieldArea({label,value,onChange,placeholder}){
     )
   );
 }
-
+ 
 // ── CUSTOMER FORM ─────────────────────────────────────────────────────────────
 function CustomerForm({initial,onSave,onCancel,saving}){
   const[f,setF]=useState(initial||{vorname:"",nachname:"",telefon:"",email:"",marke:"",modell:"",kennzeichen:"",km:""});
@@ -271,22 +272,67 @@ function CustomerForm({initial,onSave,onCancel,saving}){
     )
   );
 }
-
+ 
+// ── ZE SCHÄTZUNG ─────────────────────────────────────────────────────────────
+function schaetzeZE(beschreibung){
+  const t = beschreibung.toLowerCase();
+  // Bekannte Arbeiten mit typischen ZE-Werten
+  const regeln = [
+    [/oelwechsel|ölwechsel|oil change/,2],
+    [/inspektion|service|jahresservice/,6],
+    [/bremsen|bremsbelag|bremse/,4],
+    [/reifen|pneu|reifenwechsel/,2],
+    [/getriebe/,10],
+    [/kupplung|clutch/,8],
+    [/zahnriemen|timing/,8],
+    [/stossdaempfer|stossdämpfer|shock/,5],
+    [/lenkung/,4],
+    [/auspuff|exhaust/,3],
+    [/batterie|akku/,1],
+    [/lampe|licht|birne/,1],
+    [/diagnose|fehler|auslesen/,1],
+    [/klimaanlage|klima|ac /,3],
+    [/wasserp|kühlwasser/,5],
+    [/achse|radlager/,4],
+    [/karosserie|delle|beule/,6],
+  ];
+  for(const [re, ze] of regeln){
+    if(re.test(t)) return String(ze);
+  }
+  // Standard: 1 ZE für unbekannte Arbeiten
+  return "1";
+}
+ 
 // ── OFFERTE FORM ──────────────────────────────────────────────────────────────
 function OfferteForm({customers,onSave,onCancel}){
   const[cid,setCid]=useState("");
   const[titel,setTitel]=useState("");
-  const[positionen,setPositionen]=useState([{beschreibung:"",menge:"1",preis:""}]);
+  const[positionen,setPositionen]=useState([{beschreibung:"",menge:"1",stueckpreis:"",preis:"",ze:""}]);
   const[notizen,setNotizen]=useState("");
   const[gueltigBis,setGueltigBis]=useState("");
-  const addPos=()=>setPositionen(p=>[...p,{beschreibung:"",menge:"1",preis:""}]);
-  const updPos=(i,k,v)=>setPositionen(p=>{const n=[...p];n[i]={...n[i],[k]:v};return n;});
+  const addPos=()=>setPositionen(p=>[...p,{beschreibung:"",menge:"1",stueckpreis:"",preis:"",ze:""}]);
+  const updPos=(i,k,v)=>setPositionen(p=>{
+    const n=[...p];
+    n[i]={...n[i],[k]:v};
+    // Stückpreis × Menge = Preis auto berechnen
+    if(k==="stueckpreis"||k==="menge"){
+      const sp=parseFloat(k==="stueckpreis"?v:n[i].stueckpreis)||0;
+      const mg=parseFloat(k==="menge"?v:n[i].menge)||1;
+      n[i].preis=(sp*mg).toFixed(2);
+    }
+    // ZE auto schätzen wenn Beschreibung geändert
+    if(k==="beschreibung" && v.trim().length>3){
+      n[i].ze=schaetzeZE(v);
+    }
+    return n;
+  });
   const remPos=i=>setPositionen(p=>p.filter((_,j)=>j!==i));
-  const total=positionen.reduce((s,p)=>{const v=parseFloat(p.preis||0)*parseFloat(p.menge||1);return s+(isNaN(v)?0:v);},0);
+  const total=positionen.reduce((s,p)=>{const v=parseFloat(p.preis||0);return s+(isNaN(v)?0:v);},0);
   function submit(){
     if(!cid)return alert("Bitte Kunden wählen.");
     const pos=positionen.filter(p=>p.beschreibung.trim());
     if(!pos.length)return alert("Mindestens eine Position eingeben.");
+    if(pos.some(p=>!p.stueckpreis||parseFloat(p.stueckpreis)<=0))return alert("Bitte Stückpreis bei allen Positionen angeben.");
     onSave({customerId:cid,titel,positionen:pos,notizen,gueltigBis,totalBetrag:total.toFixed(2)});
   }
   return(
@@ -309,17 +355,28 @@ function OfferteForm({customers,onSave,onCancel}){
       , React.createElement('div', { style: {...lbl,marginBottom:10},}, "Positionen *")
       , positionen.map((pos,i)=>
         React.createElement('div', { key: i, style: {background:"#f8fafc",borderRadius:10,padding:"10px",marginBottom:8,border:"1px solid #e2e8f0"},}
-          , React.createElement('input', { value: pos.beschreibung, onChange: e=>updPos(i,"beschreibung",e.target.value), placeholder: "Beschreibung", style: {...inp,marginBottom:8},})
-          , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8,alignItems:"center"},}
+          , React.createElement('div', { style: {display:"flex",gap:8,alignItems:"center",marginBottom:8},}
+            , React.createElement('input', { value: pos.beschreibung, onChange: e=>updPos(i,"beschreibung",e.target.value), placeholder: "Beschreibung der Arbeit", style: {...inp,marginBottom:0,flex:1},})
+            , React.createElement('button', { onClick: ()=>remPos(i), disabled: positionen.length===1, style: {background:"#fee2e2",color:"#ef4444",border:"none",borderRadius:8,width:40,height:40,cursor:"pointer",fontSize:18,flexShrink:0},}, "✕")
+          )
+          , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8},}
             , React.createElement('div', null
               , React.createElement('label', { style: lbl,}, "Menge")
               , React.createElement('input', { type: "number", value: pos.menge, onChange: e=>updPos(i,"menge",e.target.value), style: inp, min:"1",})
             )
             , React.createElement('div', null
-              , React.createElement('label', { style: lbl,}, "Preis CHF")
-              , React.createElement('input', { type: "number", value: pos.preis, onChange: e=>updPos(i,"preis",e.target.value), placeholder: "0.00", style: inp,})
+              , React.createElement('label', { style: {...lbl,color:"#dc2626"},}, "Stückpreis *")
+              , React.createElement('input', { type: "number", value: pos.stueckpreis, onChange: e=>updPos(i,"stueckpreis",e.target.value), placeholder: "0.00", style: {...inp,borderColor:(!pos.stueckpreis||parseFloat(pos.stueckpreis)<=0)?"#fca5a5":"#e2e8f0"},})
             )
-            , React.createElement('button', { onClick: ()=>remPos(i), disabled: positionen.length===1, style: {background:"#fee2e2",color:"#ef4444",border:"none",borderRadius:8,width:40,height:40,cursor:"pointer",fontSize:18,marginTop:16,flexShrink:0},}, "✕")
+            , React.createElement('div', null
+              , React.createElement('label', { style: lbl,}, "Total CHF")
+              , React.createElement('input', { value: pos.preis||"0.00", readOnly: true, style: {...inp,background:"#e8f5e9",color:"#166534",fontWeight:700,cursor:"default"},})
+            )
+          )
+          , React.createElement('div', { style: {background:"#fffbeb",borderRadius:8,padding:"8px 10px",border:"1px solid #fde68a",display:"flex",alignItems:"center",gap:8},}
+            , React.createElement('span', { style: {fontSize:11,fontWeight:700,color:"#92400e",whiteSpace:"nowrap"},}, "⏱ Arbeitszeit (ZE)")
+            , React.createElement('input', { type: "number", value: pos.ze, onChange: e=>updPos(i,"ze",e.target.value), placeholder: "Auto", style: {...inp,background:"#fff",width:"80px",flexShrink:0,padding:"8px",textAlign:"center"},min:"0",step:"0.5",})
+            , React.createElement('span', { style: {fontSize:11,color:"#92400e"},}, pos.ze?(parseFloat(pos.ze)||0)+" ZE = "+(((parseFloat(pos.ze)||0)*0.6).toFixed(1))+" min":"Auto-Schätzung bei Eingabe")
           )
         )
       )
@@ -337,9 +394,9 @@ function OfferteForm({customers,onSave,onCancel}){
     )
   );
 }
-
+ 
 // ── OFFERTE DETAIL ────────────────────────────────────────────────────────────
-
+ 
 // ── EXCEL EXPORT ──────────────────────────────────────────────────────────────
 function exportOfferteExcel(offerte, customer){
   const wb = XLSX.utils.book_new();
@@ -359,12 +416,14 @@ function exportOfferteExcel(offerte, customer){
     ["Kennzeichen:", customer ? customer.kennzeichen : "–", "", ""],
     ["", "", "", ""],
     ["POSITIONEN", "", "", ""],
-    ["Beschreibung", "Menge", "Preis CHF", "Total CHF"],
+    ["Beschreibung", "Menge", "Stückpreis CHF", "Total CHF", "Arbeitszeit (ZE)"],
   ];
   (offerte.positionen || []).forEach(function(pos){
     const menge = parseFloat(pos.menge || 1);
-    const preis = parseFloat(pos.preis || 0);
-    wsData.push([pos.beschreibung, menge, preis.toFixed(2), (menge * preis).toFixed(2)]);
+    const stueck = parseFloat(pos.stueckpreis || pos.preis || 0);
+    const total = parseFloat(pos.preis || (menge * stueck));
+    const ze = pos.ze ? (parseFloat(pos.ze) + " ZE (" + ((parseFloat(pos.ze)||0)*0.75).toFixed(1) + " h)") : "–";
+    wsData.push([pos.beschreibung, menge, stueck.toFixed(2), total.toFixed(2), ze]);
   });
   wsData.push(["", "", "", ""]);
   wsData.push(["", "", "TOTAL CHF:", parseFloat(offerte.totalBetrag || 0).toFixed(2)]);
@@ -379,7 +438,7 @@ function exportOfferteExcel(offerte, customer){
   XLSX.utils.book_append_sheet(wb, ws, "Offerte");
   XLSX.writeFile(wb, "Offerte_" + offerte.offertNumber + "_" + (customer ? customer.nachname : "Kunde") + ".xlsx");
 }
-
+ 
 function OfferteDetail({offerte,customer,onClose,onUpdate,onDelete}){
   const[saving,setSaving]=useState(false);
   const stColors={entwurf:{c:"#6366f1",bg:"#eef2ff",l:"Entwurf"},versendet:{c:"#f59e0b",bg:"#fffbeb",l:"Versendet"},angenommen:{c:"#10b981",bg:"#ecfdf5",l:"Angenommen"},abgelehnt:{c:"#ef4444",bg:"#fee2e2",l:"Abgelehnt"}};
@@ -442,7 +501,7 @@ function OfferteDetail({offerte,customer,onClose,onUpdate,onDelete}){
     )
   );
 }
-
+ 
 // ── ORDER FORM ────────────────────────────────────────────────────────────────
 function OrderForm({customers,customerId:preCid,onSave,onCancel,saving}){
   const[cid,setCid]=useState(preCid||"");
@@ -484,7 +543,7 @@ function OrderForm({customers,customerId:preCid,onSave,onCancel,saving}){
     )
   );
 }
-
+ 
 // ── ORDER DETAIL ──────────────────────────────────────────────────────────────
 function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
   const[edit,setEdit]=useState(false);
@@ -655,7 +714,7 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
     )
   );
 }
-
+ 
 // ── CUSTOMER DETAIL ───────────────────────────────────────────────────────────
 function CustomerDetail({customer,orders,onClose,onEdit,onNewOrder,onOrderClick}){
   const cos=orders.filter(o=>o.customerId===customer.id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
@@ -692,7 +751,7 @@ function CustomerDetail({customer,orders,onClose,onEdit,onNewOrder,onOrderClick}
     )
   );
 }
-
+ 
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 function App(){
   const[token,setToken]=useState(()=>localStorage.getItem("garage_token")||null);
@@ -718,7 +777,7 @@ function App(){
   const[showNOff,setShowNOff]=useState(false);
   const[selOff,setSelOff]=useState(null);
   const[offertNum,setOffertNum]=useState(0);
-
+ 
   // Verify token on load
   useEffect(()=>{
     if(!token){setAuthChecked(true);return;}
@@ -731,7 +790,7 @@ function App(){
       setAuthChecked(true);
     });
   },[]);
-
+ 
   // Load data
   useEffect(()=>{
     if(!token||!authChecked)return;
@@ -748,9 +807,9 @@ function App(){
       setLoading(false);
     })();
   },[token,authChecked]);
-
+ 
   function handleLogin(t,e){setToken(t);setUserEmail(e);setLoading(true);}
-
+ 
   async function handleLogout(){
     if(!window.confirm("Abmelden?"))return;
     await auth.signOut(token);
@@ -758,13 +817,13 @@ function App(){
     localStorage.removeItem("garage_email");
     setToken(null);setUserEmail(null);setCustomers([]);setOrders([]);
   }
-
+ 
   async function syncOk(fn){
     setSyncStatus("saving");
     try{await fn();setSyncStatus("ok");}
     catch(e){console.error(e);setSyncStatus("error");alert("Fehler beim Speichern!");}
   }
-
+ 
   async function addCustomer(data){
     const id=`c_${Date.now()}`;
     const newC={id,...data,createdAt:new Date().toISOString()};
@@ -806,15 +865,15 @@ function App(){
     await syncOk(()=>db.delete("orders",id,token));
     setOrders(p=>p.filter(o=>o.id!==id));setSelO(null);
   }
-
+ 
   if(!authChecked)return(
     React.createElement('div', { style: {minHeight:"100dvh",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center"},}
       , React.createElement('div', { style: {width:36,height:36,border:"4px solid #334155",borderTopColor:"#6366f1",borderRadius:"50%",animation:"spin 0.8s linear infinite"},})
     )
   );
-
+ 
   if(!token)return React.createElement(LoginPage, { onLogin: handleLogin,});
-
+ 
   const activeOrders=orders.filter(o=>o.status!=="abgeschlossen");
   const todos=orders.filter(needsAttention);
   const filteredC=customers.filter(c=>{
@@ -825,14 +884,14 @@ function App(){
     if(filterK==="inactive"&&as)return false;
     return m;
   });
-
+ 
   const navBtn=(t,icon,label)=>(
     React.createElement('button', { onClick: ()=>setTab(t), style: {flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",border:"none",background:"none",cursor:"pointer",padding:"8px 4px",gap:3,color:tab===t?"#6366f1":"#94a3b8"},}
       , React.createElement('span', { style: {fontSize:22},}, icon)
       , React.createElement('span', { style: {fontSize:10,fontWeight:700,letterSpacing:0.3},}, label)
     )
   );
-
+ 
   if(loading)return(
     React.createElement('div', { style: {minHeight:"100dvh",background:"#f1f5f9"},}
       , React.createElement('div', { style: {background:"#0f172a",height:52,display:"flex",alignItems:"center",padding:"0 16px",gap:8},}
@@ -841,7 +900,7 @@ function App(){
       , React.createElement(Spinner, { text: "Daten werden geladen…"  ,})
     )
   );
-
+ 
   return(
     React.createElement('div', { style: {minHeight:"100dvh",background:"#f1f5f9",paddingBottom:80},}
       /* Header */
@@ -860,9 +919,9 @@ function App(){
           )
         )
       )
-
+ 
       , React.createElement('div', { style: {maxWidth:900,margin:"0 auto",padding:"16px 14px"},}
-
+ 
         /* DASHBOARD */
         , tab==="dashboard"&&(
           React.createElement('div', null
@@ -932,7 +991,7 @@ function App(){
             )
           )
         )
-
+ 
         /* OFFERTEN */
         , tab==="offerten"&&(
           React.createElement('div', null
@@ -973,7 +1032,7 @@ function App(){
             })
           )
         )
-
+ 
         /* AUFTRÄGE */
         , tab==="auftraege"&&(
           React.createElement('div', null
@@ -1034,7 +1093,7 @@ function App(){
             , !orders.length&&React.createElement('p', { style: {color:"#94a3b8",textAlign:"center",padding:"40px 0",fontSize:14},}, "Noch keine Aufträge."  )
           )
         )
-
+ 
         /* KUNDENKARTEI */
         , tab==="kunden"&&(
           React.createElement('div', null
@@ -1066,7 +1125,7 @@ function App(){
           )
         )
       )
-
+ 
       /* FAB */
       , fabOpen&&React.createElement('div', { onClick: ()=>setFabOpen(false), style: {position:"fixed",inset:0,zIndex:49},})
       , fabOpen&&(
@@ -1080,7 +1139,7 @@ function App(){
         )
       )
       , React.createElement('button', { className: "fab", onClick: ()=>setFabOpen(p=>!p), style: {bottom:"calc(72px + env(safe-area-inset-bottom))",transform:fabOpen?"rotate(45deg)":"rotate(0deg)"},}, "+")
-
+ 
       /* Bottom Nav */
       , React.createElement('div', { style: {position:"fixed",bottom:0,left:0,right:0,background:"#fff",borderTop:"1px solid #e2e8f0",display:"flex",zIndex:100,boxShadow:"0 -4px 16px rgba(0,0,0,0.06)",paddingBottom:"env(safe-area-inset-bottom)"},}
         , navBtn("dashboard","🏠","Dashboard")
@@ -1088,7 +1147,7 @@ function App(){
         , navBtn("offerten","📄","Offerten")
         , navBtn("kunden","👥","Kunden")
       )
-
+ 
       /* MODALS */
       
       , afterSave&&!showNO&&(()=>{
@@ -1113,9 +1172,9 @@ function App(){
     )
   );
 }
-
+ 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
-
+ 
 </script>
 </body>
 </html>
