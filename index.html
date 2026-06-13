@@ -60,7 +60,7 @@
   --radius-xl: 22px;
 }
 
-@media (prefers-color-scheme: dark) {
+@media not all {
   :root {
     --blue:     #0A84FF;
     --blue-d:   #007AFF;
@@ -187,7 +187,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.60),0 8px 32px 0 rgba(0,0,0,0.08);
   padding-top:env(safe-area-inset-top);
 }
-@media (prefers-color-scheme:dark){
+@media not all {
   .nav-bar{
     background:rgba(8,10,22,0.84);
     border-bottom:1px solid rgba(255,255,255,0.10);
@@ -215,7 +215,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   padding-bottom:env(safe-area-inset-bottom);
   display:flex;
 }
-@media (prefers-color-scheme:dark){
+@media not all {
   .tab-bar{
     background:rgba(8,10,22,0.90);
     border-top:1px solid rgba(255,255,255,0.10);
@@ -334,7 +334,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.60),0 8px 32px 0 rgba(0,0,0,0.10);
   border-radius:12px;
 }
-@media(prefers-color-scheme:dark){
+@media not all {
   .pill-btn-inactive{background:rgba(40,48,80,0.68);color:var(--label2);border-color:rgba(255,255,255,0.10)!important}
   .glass-panel{background:rgba(32,38,62,0.78);border-color:rgba(255,255,255,0.14)}
 }
@@ -453,7 +453,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
 .status-zahlung_erhalten{background:rgba(175,82,222,0.10);color:#9842C8}
 .status-abgeschlossen {background:rgba(110,110,115,0.10);color:var(--label2)}
 
-@media(prefers-color-scheme:dark){
+@media not all {
   .status-aufnahme{background:rgba(94,92,230,0.18);color:#7D7AFF}
   .status-offerte_versendet{background:rgba(255,159,10,0.18);color:#FF9F0A}
   .status-offerte_bestaetigt{background:rgba(48,209,88,0.18);color:#30D158}
@@ -473,7 +473,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
 }
 .alert-warning{background:rgba(255,149,0,0.10);color:#C67000;border:0.5px solid rgba(255,149,0,0.22)}
 .alert-danger  {background:rgba(255,59,48,0.09);color:#CC2200;border:0.5px solid rgba(255,59,48,0.22)}
-@media(prefers-color-scheme:dark){
+@media not all {
   .alert-warning{color:#FF9F0A;border-color:rgba(255,159,10,0.28)}
   .alert-danger{color:#FF453A;border-color:rgba(255,69,58,0.28)}
 }
@@ -506,7 +506,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   min-width:240px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.60),0 24px 64px 0 rgba(0,0,0,0.20),0 6px 20px rgba(0,0,0,0.12);
 }
-@media(prefers-color-scheme:dark){
+@media not all {
   .context-menu{background:rgba(24,28,52,0.94);border-color:rgba(255,255,255,0.13);}
 }
 .context-item{
@@ -542,7 +542,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   padding-bottom:env(safe-area-inset-bottom);
   box-shadow:0 -8px 32px 0 rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.60);
 }
-@media(prefers-color-scheme:dark){
+@media not all {
   .sheet-container{
     background:rgba(10,13,28,0.94);
     border-top-color:rgba(255,255,255,0.12);
@@ -635,7 +635,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   box-shadow:var(--glass-shine),var(--shadow-xl);
   width:100%;max-width:380px;
 }
-@media(prefers-color-scheme:dark){
+@media not all {
   .login-card{
     background:linear-gradient(162deg,rgba(36,42,72,0.90) 0%,rgba(16,20,44,0.82) 100%);
   }
@@ -675,7 +675,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
 }
 .excel-btn:hover{background:rgba(0,160,56,0.20);transform:scale(1.06)}
 .excel-btn:active{opacity:0.65;transform:scale(0.96)}
-@media(prefers-color-scheme:dark){
+@media not all {
   .excel-btn{background:rgba(52,199,89,0.13);color:#30D158;border-color:rgba(52,199,89,0.25)}
   .excel-btn:hover{background:rgba(52,199,89,0.22)}
 }
@@ -707,8 +707,8 @@ const auth={
 };
 const db={
   async get(table,token){const r=await fetch(`${SUPA_URL}/rest/v1/${table}?select=*`,{headers:h(token)});return r.json();},
-  async upsert(table,obj,token){await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:"POST",headers:{...h(token),"Prefer":"resolution=merge-duplicates"},body:JSON.stringify(obj)});},
-  async delete(table,id,token){await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:h(token)});},
+  async upsert(table,obj,token){const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:"POST",headers:{...h(token),"Prefer":"resolution=merge-duplicates"},body:JSON.stringify(obj)});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`HTTP ${r.status}`);}},
+  async delete(table,id,token){const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:h(token)});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`HTTP ${r.status}`);}},
   async getCounter(token){const r=await fetch(`${SUPA_URL}/rest/v1/counters?id=eq.orderNum&select=value`,{headers:h(token)});const d=await r.json();return _optionalChain([d,'access',x=>x[0],'optionalAccess',x=>x.value])||0;},
   async setCounter(val,token){await fetch(`${SUPA_URL}/rest/v1/counters?id=eq.orderNum`,{method:"PATCH",headers:h(token),body:JSON.stringify({value:val})});}
 };
@@ -873,7 +873,7 @@ function Sheet({title,onClose,children,full,barLeft,barRight}){
 
 /* ── FORM FIELD ── */
 function FormRow({label,children}){
-  return React.createElement('div',{style:{padding:"11px 16px",borderBottom:"0.33px solid var(--sep)",background:"rgba(255,255,255,0.55)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}
+  return React.createElement('div',{style:{padding:"11px 16px",borderBottom:"0.33px solid var(--sep)",background:"rgba(255,255,255,0.75)",backdropFilter:"blur(15px)",WebkitBackdropFilter:"blur(15px)"}}
     ,label&&React.createElement('div',{className:"sf-caption1",style:{color:"var(--label2)",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}},label)
     ,children
   );
@@ -1122,168 +1122,186 @@ function OfferteForm({customers,onSave,onCancel}){
   );
 }
 
-/* ── EXCEL EXPORT ── */
+/* ── EXCEL EXPORT – Offerte (Vorlage_Offerte) ── */
 function exportOfferteExcel(offerte,customer){
   const wb=XLSX.utils.book_new();const ws={};
   const addr=(c,r)=>XLSX.utils.encode_cell({c,r});
   const set=(c,r,v,s)=>{ws[addr(c,r)]={v,t:typeof v==="number"?"n":"s",s:s||{}};};
   const num=(c,r,v,s)=>{ws[addr(c,r)]={v:isNaN(v)?0:v,t:"n",s:s||{}};};
-  const COL_DARK="1E1E2E",COL_BLUE="007AFF",COL_WHITE="FFFFFF",COL_LINE="CCCCCC",COL_GREY="F2F2F2";
-  const fB=(sz,c)=>({bold:true,sz:sz||10,color:{rgb:c||COL_DARK},name:"Arial"});
-  const fN=(sz,c)=>({sz:sz||10,color:{rgb:c||COL_DARK},name:"Arial"});
-  const fW=(sz)=>({bold:true,sz:sz||10,color:{rgb:COL_WHITE},name:"Arial"});
-  const fillD={patternType:"solid",fgColor:{rgb:COL_DARK}};
-  const fillB={patternType:"solid",fgColor:{rgb:COL_BLUE}};
-  const fillG={patternType:"solid",fgColor:{rgb:COL_GREY}};
-  const bThin={style:"thin",color:{rgb:COL_LINE}};
+  const BLK="000000",YEL="FFFF00";
+  const bThin={style:"thin",color:{rgb:BLK}};
   const bAll={top:bThin,bottom:bThin,left:bThin,right:bThin};
-  const al=(h,v)=>({horizontal:h||"left",vertical:v||"center",wrapText:true});
+  const bT={top:bThin};const bB={bottom:bThin};
+  const fB=(sz)=>({bold:true,sz:sz||10,name:"Calibri",color:{rgb:BLK}});
+  const fN=(sz)=>({sz:sz||10,name:"Calibri",color:{rgb:BLK}});
+  const fillY={patternType:"solid",fgColor:{rgb:YEL}};
+  const alL={horizontal:"left",vertical:"center"};
+  const alR={horizontal:"right",vertical:"center"};
+  const alC={horizontal:"center",vertical:"center"};
   const datum=new Date(offerte.createdAt||Date.now()).toLocaleDateString("de-CH");
-  const fahrzeug=customer?[customer.marke,customer.modell].filter(Boolean).join(" ")||"–":"–";
+  const fahrzeug=customer?[customer.marke,customer.modell].filter(Boolean).join(" ")||"":"";
   const positionen=offerte.positionen||[];
+  const totalB=parseFloat(offerte.totalBetrag||0);
   let r=0;
-  set(0,r,"Budget Offerte",{font:fW(14),fill:fillD,alignment:al("left","center")});
-  set(1,r,"",{fill:fillD});set(2,r,"",{fill:fillD});
-  set(3,r,"079 850 18 63",{font:fN(10,COL_WHITE),fill:fillD,alignment:al("right","center")});
-  set(4,r,"",{fill:fillD});r++;
-  set(0,r,"Offertennummer:",{font:fB(10,COL_BLUE),alignment:al()});
-  set(1,r,String(offerte.offertNumber||"–"),{font:fB(10),alignment:al()});
-  set(3,r,"Datum:",{font:fB(10),alignment:al("right")});
-  set(4,r,datum,{font:fN(10),alignment:al()});r++;
-  set(0,r,"",{});r++;
-  set(0,r,"Fahrzeug",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-  [[" Fahrzeugbesitzer:",customer?`${customer.vorname} ${customer.nachname}`:"–","Telefon:",customer?customer.telefon||"–":"–"],
-   ["Kennzeichen:",customer?customer.kennzeichen||"–":"–","Marke/Modell:",fahrzeug],
-   ["KM-Stand:",customer?customer.km||"–":"–","",""]].forEach(([la,va,lb,vb])=>{
-    set(0,r,la,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(1,r,va,{font:fN(9),border:bAll,alignment:al()});
-    set(2,r,"",{border:bAll});
-    set(3,r,lb,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(4,r,vb,{font:fN(9),border:bAll,alignment:al()});r++;
+  /* Row 0 – Titel + Kontakt */
+  set(0,r,"Budget Offerte",{font:fB(14),alignment:alL});
+  set(4,r,"Fabio Stucki",{font:fN(9),alignment:alR});r++;
+  /* Row 1 – Offertennummer (gelb) + Adresse */
+  set(0,r,"Offertennummer",{font:fB(10),fill:fillY,border:bAll,alignment:alL});
+  set(1,r,String(offerte.offertNumber||"–"),{font:fB(10),fill:fillY,border:bAll,alignment:alL});
+  set(2,r,"",{fill:fillY,border:bAll});set(3,r,"",{fill:fillY,border:bAll});
+  set(4,r,"Polenstrasse 245",{font:fN(9),alignment:alR});r++;
+  set(4,r,"5112 Thalheim AG",{font:fN(9),alignment:alR});r++;
+  set(4,r,"079 850 18 63",{font:fN(9),alignment:alR});r++;r++;
+  /* Fahrzeuginfo-Box */
+  [["Fahrzeug",fahrzeug],["1. Inv.-Setzung",""],
+   ["Kennzeichen",customer?customer.kennzeichen||"":""],
+   ["Chassis-Nr.",""],
+   ["Km Stand",customer?String(customer.km||""):""],
+   ["Fahrzeugbesitzer",customer?`${customer.vorname} ${customer.nachname}`:""]
+  ].forEach(([l,v])=>{
+    set(0,r,l,{font:fN(10),border:bAll,alignment:alL});
+    set(1,r,v,{font:fN(10),border:bAll,alignment:alL});
+    [2,3,4].forEach(c=>set(c,r,"",{border:bAll}));r++;
   });
-  set(0,r,"",{});r++;
-  const pH={font:fW(10),fill:fillB,alignment:al("center","center"),border:bAll};
-  set(0,r,"Bezeichnung",{...pH,alignment:al()});set(1,r,"Menge",pH);set(2,r,"Stk.Preis",pH);set(3,r,"Preis CHF",pH);set(4,r,"ZE",pH);
-  const headerRow=r;r++;
-  const firstDataRow=r+1;
-  positionen.forEach((pos,idx)=>{
-    const bg=idx%2===0?"FFFFFF":"F8FAFF";const cs={font:fN(9),fill:{patternType:"solid",fgColor:{rgb:bg}},border:bAll,alignment:al()};
-    set(0,r,pos.beschreibung||"",cs);num(1,r,parseFloat(pos.menge||1),{...cs,alignment:al("right")});
-    num(2,r,parseFloat(pos.stueckpreis||pos.preis||0),{...cs,alignment:al("right")});
-    num(3,r,parseFloat(pos.preis||0),{...cs,alignment:al("right")});
-    set(4,r,parseFloat(pos.ze)||0?String(parseFloat(pos.ze)):"–",{...cs,alignment:al("center")});r++;
+  /* Std.Satz */
+  set(0,r,"Std.Satz:",{font:fN(10),border:bAll,alignment:alL});
+  set(1,r,"CHF",{font:fN(10),border:bAll,alignment:alC});
+  set(2,r,"80.00",{font:fN(10),border:bAll,alignment:alL});
+  [3,4].forEach(c=>set(c,r,"",{border:bAll}));r++;
+  /* Spaltenköpfe */
+  set(0,r,"Bezeichnung",{font:fB(10),border:bAll,alignment:alL});
+  set(1,r,"Menge",{font:fB(10),border:bAll,alignment:alC});
+  set(2,r,"Stk.Preis",{font:fB(10),border:bAll,alignment:alC});
+  set(3,r,"Preis (CHF)",{font:fB(10),border:bAll,alignment:alC});
+  set(4,r,"ZE",{font:fB(10),border:bAll,alignment:alC});r++;
+  /* Positionen */
+  const MIN=10;
+  positionen.forEach(pos=>{
+    const mat=pos.typ==="material";
+    const rS={font:fN(9),border:bAll,alignment:{horizontal:"left",vertical:"center",wrapText:true}};
+    set(0,r,pos.beschreibung||"",rS);
+    mat?num(1,r,parseFloat(pos.menge)||1,{font:fN(9),border:bAll,alignment:alC}):set(1,r,"",{font:fN(9),border:bAll,alignment:alC});
+    mat?num(2,r,parseFloat(pos.stueckpreis)||0,{font:fN(9),border:bAll,alignment:alR}):set(2,r,"",{font:fN(9),border:bAll,alignment:alR});
+    num(3,r,parseFloat(pos.preis)||0,{font:fN(9),border:bAll,alignment:alR});
+    set(4,r,(!mat&&pos.ze)?String(parseFloat(pos.ze)):"",{font:fN(9),border:bAll,alignment:alC});r++;
   });
-  const lastDataRow=r;
-  set(3,r,"Offertentotal CHF",{font:fW(11),fill:fillB,border:bAll,alignment:al("right","center")});
-  ws[addr(3,r)]={v:parseFloat(offerte.totalBetrag||0),t:"n",f:`SUM(D${firstDataRow}:D${lastDataRow})`,s:{font:fW(11),fill:fillB,border:bAll,alignment:al("right","center")}};
-  num(4,r,parseFloat(offerte.totalBetrag||0),{font:fW(11),fill:fillB,border:bAll,alignment:al("center","center")});r++;
-  set(0,r,"",{});r++;
-  set(0,r,"Zahlungsziel: 30 Tage netto",{font:fB(9,COL_BLUE),alignment:al()});r++;
-  ["Fabio Stucki","Polenstrasse 245","5112 Thalheim AG"].forEach(l=>{set(0,r,l,{font:fN(9),alignment:al()});r++;});
-  if(offerte.notizen){set(0,r,"Notizen:",{font:fB(9,COL_BLUE),alignment:al()});r++;set(0,r,offerte.notizen,{font:fN(9),alignment:{...al(),wrapText:true}});r++;}
-  ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:2}},{s:{r:3,c:0},e:{r:3,c:4}},{s:{r:headerRow,c:0},e:{r:headerRow,c:0}}];
-  ws["!cols"]=[{wch:38},{wch:10},{wch:14},{wch:16},{wch:10}];
+  for(let i=positionen.length;i<MIN;i++){[0,1,2,3,4].forEach(c=>set(c,r,"",{border:bAll}));r++;}
+  /* Summe */
+  set(0,r,"Summe",{font:fN(10),border:bAll,alignment:alL});
+  [1,2].forEach(c=>set(c,r,"",{border:bAll}));
+  set(3,r,"CHF",{font:fN(10),border:{...bAll},alignment:alL});
+  num(4,r,totalB,{font:fN(10),border:bAll,alignment:alR});r++;
+  /* Trennzeile / Kleinmaterial-Placeholder */
+  [0,1,2].forEach(c=>set(c,r,"",{border:{top:bThin,bottom:bThin}}));
+  set(3,r,"CHF",{font:fN(9),border:bAll,alignment:alL});
+  num(4,r,0,{font:fN(9),border:bAll,alignment:alR});r++;
+  /* Offertentotal */
+  set(0,r,"Offertentotal",{font:fB(10),border:bAll,alignment:alL});
+  [1,2].forEach(c=>set(c,r,"",{border:bAll}));
+  set(3,r,"CHF",{font:fB(10),border:bAll,alignment:alL});
+  num(4,r,totalB,{font:fB(10),border:bAll,alignment:alR});r++;r++;
+  /* Fussnotizen */
+  set(0,r,"ZE basieren auf einer reibungslosen Reparatur",{font:fN(9),alignment:alL});r++;
+  set(0,r,"Kleinmaterial-Pauschale wird bei <100 ZE hinzugefügt",{font:fN(9),alignment:alL});r++;r++;r++;
+  /* Datum / Ort (gelb) */
+  set(0,r,"Datum",{font:fN(10),alignment:alR});
+  set(1,r,datum,{font:fN(10),fill:fillY,border:bAll,alignment:alL});r++;
+  set(0,r,"Ort",{font:fN(10),alignment:alR});
+  set(1,r,"Thalheim AG",{font:fN(10),alignment:alL});r++;r++;
+  /* Zahlungskonditionen */
+  set(0,r,"Zahlungskontitionen bei",{font:fN(10),alignment:alL});
+  set(2,r,"10 Tage netto",{font:fN(10),alignment:alL});r++;
+  set(0,r,"Rechnungstellung",{font:fN(10),alignment:alL});r++;
+  ws["!merges"]=[{s:{r:1,c:0},e:{r:1,c:3}}];
+  ws["!cols"]=[{wch:34},{wch:10},{wch:12},{wch:14},{wch:10}];
   ws["!ref"]=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r+1,c:4}});
   XLSX.utils.book_append_sheet(wb,ws,"Offerte");
   XLSX.writeFile(wb,"Offerte_"+offerte.offertNumber+"_"+(customer?customer.nachname:"Kunde")+".xlsx");
 }
 
-/* ── AUFTRAG EXCEL EXPORT ── */
+/* ── AUFTRAG EXCEL EXPORT (Vorlage_Auftrag) ── */
 function exportOrderExcel(order,customer){
   const wb=XLSX.utils.book_new();const ws={};
   const addr=(c,r)=>XLSX.utils.encode_cell({c,r});
   const set=(c,r,v,s)=>{ws[addr(c,r)]={v,t:typeof v==="number"?"n":"s",s:s||{}};};
-  const num=(c,r,v,s)=>{ws[addr(c,r)]={v:isNaN(v)?0:v,t:"n",s:s||{}};};
-  const COL_DARK="1E1E2E",COL_BLUE="007AFF",COL_WHITE="FFFFFF",COL_LINE="BDC3C7",COL_GREY="EAEDED";
-  const fB=(sz,c)=>({bold:true,sz:sz||10,color:{rgb:c||COL_DARK},name:"Arial"});
-  const fN=(sz,c)=>({sz:sz||10,color:{rgb:c||COL_DARK},name:"Arial"});
-  const fW=(sz)=>({bold:true,sz:sz||10,color:{rgb:COL_WHITE},name:"Arial"});
-  const fillD={patternType:"solid",fgColor:{rgb:COL_DARK}};
-  const fillB={patternType:"solid",fgColor:{rgb:COL_BLUE}};
-  const fillG={patternType:"solid",fgColor:{rgb:COL_GREY}};
-  const bThin={style:"thin",color:{rgb:COL_LINE}};
+  const BLK="000000",YEL="FFFF00";
+  const bThin={style:"thin",color:{rgb:BLK}};
   const bAll={top:bThin,bottom:bThin,left:bThin,right:bThin};
-  const al=(h,v)=>({horizontal:h||"left",vertical:v||"center",wrapText:true});
+  const bB={bottom:bThin};const bT={top:bThin};
+  const fB=(sz)=>({bold:true,sz:sz||10,name:"Calibri",color:{rgb:BLK}});
+  const fN=(sz)=>({sz:sz||10,name:"Calibri",color:{rgb:BLK}});
+  const fillY={patternType:"solid",fgColor:{rgb:YEL}};
+  const alL={horizontal:"left",vertical:"center"};
+  const alR={horizontal:"right",vertical:"center"};
+  const alC={horizontal:"center",vertical:"center"};
   const datum=new Date(order.createdAt||Date.now()).toLocaleDateString("de-CH");
-  const fahrzeug=customer?[customer.marke,customer.modell].filter(Boolean).join(" ")||"–":"–";
+  const fahrzeug=customer?[customer.marke,customer.modell].filter(Boolean).join(" ")||"":"";
   let r=0;
-  // Header
-  set(0,r,"Werkstattauftrag",{font:fW(14),fill:fillD,alignment:al("left","center")});
-  set(1,r,"",{fill:fillD});set(2,r,"",{fill:fillD});
-  set(3,r,"079 850 18 63",{font:fN(10,COL_WHITE),fill:fillD,alignment:al("right","center")});
-  set(4,r,"",{fill:fillD});r++;
-  set(0,r,"Auftragsnummer:",{font:fB(10,COL_BLUE),alignment:al()});
-  set(1,r,String(order.orderNumber||"–"),{font:fB(10),alignment:al()});
-  set(3,r,"Datum:",{font:fB(10),alignment:al("right")});
-  set(4,r,datum,{font:fN(10),alignment:al()});r++;
-  set(0,r,"",{});r++;
-  // Kundendaten
-  set(0,r,"Kundendaten",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-  [[" Kundenname:",customer?`${customer.vorname} ${customer.nachname}`:"–","Telefon:",customer?customer.telefon||"–":"–"],
-   ["E-Mail:",customer?customer.email||"–":"–","",""]].forEach(([la,va,lb,vb])=>{
-    set(0,r,la,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(1,r,va,{font:fN(9),border:bAll,alignment:al()});
-    set(2,r,"",{border:bAll});
-    set(3,r,lb,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(4,r,vb,{font:fN(9),border:bAll,alignment:al()});r++;
+  /* Row 0 – Titel + Kontakt */
+  set(0,r,"Kundenauftrag",{font:fB(14),alignment:alL});
+  set(3,r,"Fabio Stucki",{font:fN(9),alignment:alR});r++;
+  /* Row 1 – Auftragsnummer (gelb) + Adresse */
+  set(0,r,"Auftragsnummer",{font:fB(10),fill:fillY,border:bAll,alignment:alL});
+  set(1,r,String(order.orderNumber||"–"),{font:fB(10),fill:fillY,border:bAll,alignment:alL});
+  set(2,r,"",{fill:fillY,border:bAll});
+  set(3,r,"Polenstrasse 245",{font:fN(9),alignment:alR});r++;
+  set(3,r,"5112 Thalheim AG",{font:fN(9),alignment:alR});r++;
+  set(3,r,"079 850 18 63",{font:fN(9),alignment:alR});r++;r++;
+  /* Fahrzeug-Info-Box */
+  [["Fahrzeug",fahrzeug],["1. Inv.-Setzung",""],
+   ["Kennzeichen",customer?customer.kennzeichen||"":""],
+   ["Chassis-Nr.",""],
+   ["Km Stand",customer?String(customer.km||""):""],
+   ["Fahrzeugbesitzer",customer?`${customer.vorname} ${customer.nachname}`:""]
+  ].forEach(([l,v])=>{
+    set(0,r,l,{font:fN(10),border:bAll,alignment:alL});
+    set(1,r,v,{font:fN(10),border:bAll,alignment:alL});
+    [2,3].forEach(c=>set(c,r,"",{border:bAll}));r++;
   });
-  set(0,r,"",{});r++;
-  // Fahrzeugdaten
-  set(0,r,"Fahrzeugdaten",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-  [["Kennzeichen:",customer?customer.kennzeichen||"–":"–","Marke / Modell:",fahrzeug],
-   ["KM-Stand:",customer?String(customer.km||"–"):"–","Stundenansatz:","CHF 80.00/h"]].forEach(([la,va,lb,vb])=>{
-    set(0,r,la,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(1,r,va,{font:fN(9),border:bAll,alignment:al()});
-    set(2,r,"",{border:bAll});
-    set(3,r,lb,{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(4,r,vb,{font:fN(9),border:bAll,alignment:al()});r++;
+  [0,1,2,3].forEach(c=>set(c,r,"",{border:bAll}));r++;
+  /* Std.Satz */
+  set(0,r,"Std.Satz:",{font:fN(10),border:bAll,alignment:alL});
+  set(1,r,"CHF",{font:fN(10),border:bAll,alignment:alC});
+  set(2,r,"80.00",{font:fN(10),border:bAll,alignment:alL});
+  set(3,r,"",{border:bAll});r++;
+  /* Spaltenköpfe Arbeiten / ZE */
+  set(0,r,"Arbeiten",{font:fN(10),border:bAll,alignment:alL});
+  [1,2].forEach(c=>set(c,r,"",{border:bAll}));
+  set(3,r,"ZE",{font:fN(10),border:bAll,alignment:alC});r++;
+  /* Arbeits-Positionen (Beanstandungen + Checklist) */
+  const workItems=[
+    ...(order.beanstandungen||[]).map(b=>b),
+    ...(order.offertItems||[]).map(i=>i.text||"")
+  ].filter(Boolean);
+  const MIN=10;
+  workItems.forEach(text=>{
+    set(0,r,text,{font:fN(9),border:bAll,alignment:{horizontal:"left",vertical:"center",wrapText:true}});
+    [1,2,3].forEach(c=>set(c,r,"",{border:bAll}));r++;
   });
-  set(0,r,"",{});r++;
-  // Beanstandungen
-  if((order.beanstandungen||[]).length){
-    set(0,r,"Beanstandungen",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-    (order.beanstandungen||[]).forEach((b,i)=>{
-      const bg=i%2===0?"FFFFFF":"F8FAFF";
-      const cs={font:fN(9),fill:{patternType:"solid",fgColor:{rgb:bg}},border:bAll,alignment:al()};
-      set(0,r,`${i+1}.`,{...cs,alignment:al("center")});
-      set(1,r,b,cs);[2,3,4].forEach(c=>set(c,r,"",{...cs}));r++;
-    });
-    set(0,r,"",{});r++;
-  }
-  // Checkliste
-  if((order.offertItems||[]).length){
-    set(0,r,"Checkliste / Ausgeführte Arbeiten",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-    (order.offertItems||[]).forEach((item,i)=>{
-      const bg=i%2===0?"FFFFFF":"F8FAFF";
-      const cs={font:fN(9),fill:{patternType:"solid",fgColor:{rgb:bg}},border:bAll,alignment:al()};
-      set(0,r,item.checked?"✓":"○",{...cs,alignment:al("center")});
-      set(1,r,item.text||"",cs);[2,3,4].forEach(c=>set(c,r,"",{...cs}));r++;
-    });
-    set(0,r,"",{});r++;
-  }
-  // Beträge
-  set(0,r,"Betragsübersicht",{font:fW(10),fill:fillB,alignment:al()});[1,2,3,4].forEach(c=>set(c,r,"",{fill:fillB}));r++;
-  if(order.offertBetrag){
-    set(0,r,"Offertbetrag:",{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(1,r,"",{border:bAll});set(2,r,"",{border:bAll});
-    num(3,r,parseFloat(order.offertBetrag||0),{font:fN(9),border:bAll,alignment:al("right")});
-    set(4,r,"CHF",{font:fN(9),border:bAll,alignment:al("center")});r++;
-  }
-  if(order.rechnungsBetrag){
-    set(0,r,"Rechnungsbetrag:",{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-    set(1,r,"",{border:bAll});set(2,r,"",{border:bAll});
-    num(3,r,parseFloat(order.rechnungsBetrag||0),{font:fW(10),fill:{patternType:"solid",fgColor:{rgb:COL_BLUE}},border:bAll,alignment:al("right")});
-    set(4,r,"CHF",{font:fW(10),fill:{patternType:"solid",fgColor:{rgb:COL_BLUE}},border:bAll,alignment:al("center")});r++;
-  }
-  set(0,r,"Zahlungsziel:",{font:fB(9),fill:fillG,border:bAll,alignment:al()});
-  set(1,r,"30 Tage netto",{font:fB(9,COL_BLUE),border:bAll,alignment:al()});
-  [2,3,4].forEach(c=>set(c,r,"",{border:bAll}));r++;
-  set(0,r,"",{});r++;
-  if(order.notizen){set(0,r,"Notizen:",{font:fB(9,COL_BLUE),alignment:al()});r++;set(0,r,order.notizen,{font:fN(9),alignment:{...al(),wrapText:true}});r++;set(0,r,"",{});r++;}
-  ["Fabio Stucki","Polenstrasse 245","5112 Thalheim AG"].forEach(l=>{set(0,r,l,{font:fN(9),alignment:al()});r++;});
-  ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:2}}];
-  ws["!cols"]=[{wch:28},{wch:28},{wch:14},{wch:16},{wch:10}];
-  ws["!ref"]=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r+1,c:4}});
+  for(let i=workItems.length;i<MIN;i++){[0,1,2,3].forEach(c=>set(c,r,"",{border:bAll}));r++;}
+  /* Doppel-Trennlinie vor ZE-Total */
+  [0,1,2,3].forEach(c=>set(c,r,"",{border:bB}));r++;
+  [0,1,2,3].forEach(c=>set(c,r,"",{border:bT}));r++;
+  /* ZE-Total */
+  set(0,r,"ZE-Total",{font:fB(10),border:bAll,alignment:alL});
+  [1,2,3].forEach(c=>set(c,r,"",{border:bAll}));r++;r++;
+  /* Hinweis */
+  set(0,r,"ZE basieren auf einer reibungslosen Reparatur",{font:fN(9),alignment:alL});r++;r++;r++;
+  /* Datumsfelder (gelb) */
+  set(0,r,"Beginndatum",{font:fN(10),alignment:alR});
+  set(1,r,datum,{font:fN(10),fill:fillY,border:bAll,alignment:alL});r++;
+  set(0,r,"Fertigstelldatum",{font:fN(10),alignment:alR});
+  set(1,r,"",{font:fN(10),fill:fillY,border:bAll,alignment:alL});r++;
+  set(0,r,"Ort",{font:fN(10),alignment:alR});
+  set(1,r,"Thalheim AG",{font:fN(10),alignment:alL});r++;r++;
+  /* Zahlungskonditionen */
+  set(0,r,"Zahlungskontitionen bei",{font:fN(10),alignment:alL});
+  set(2,r,"10 Tage netto",{font:fN(10),alignment:alL});r++;
+  set(0,r,"Rechnungstellung",{font:fN(10),alignment:alL});r++;
+  ws["!merges"]=[{s:{r:1,c:0},e:{r:1,c:2}}];
+  ws["!cols"]=[{wch:40},{wch:14},{wch:12},{wch:10}];
+  ws["!ref"]=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r+1,c:3}});
   XLSX.utils.book_append_sheet(wb,ws,"Auftrag");
   XLSX.writeFile(wb,"Auftrag_"+order.orderNumber+"_"+(customer?customer.nachname:"Kunde")+".xlsx");
 }
@@ -1544,7 +1562,7 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
             placeholder:"Neue Position…",
             style:{flex:1,background:"none",border:"none",outline:"none",fontSize:17,color:"var(--label)"}})
           ,React.createElement('button',{onClick:addItem,
-            style:{background:"linear-gradient(to bottom,#54a4ff,#007aff)",color:"#fff",border:"1px solid #004fb0",borderRadius:8,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.5),0 2px 4px rgba(0,0,0,0.18)"}},
+            style:{background:"linear-gradient(to bottom,#54a4ff 0%,#007aff 50%,#0056b3 100%)",color:"#fff",border:"1px solid #004fb0",borderRadius:8,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"inset 0 1px 0px rgba(255,255,255,0.6),inset 0 -1px 2px rgba(0,0,0,0.2),0 4px 6px rgba(0,0,0,0.15)",textShadow:"0 -1px 0 rgba(0,0,0,0.3)",fontWeight:"bold"}},
             React.createElement(SFPlus,{size:16}))
         )
       )
@@ -1638,7 +1656,7 @@ function CustomerDetail({customer,orders,onClose,onEdit,onNewOrder,onOrderClick}
           ,customer.email&&React.createElement('div',{className:"sf-footnote",style:{color:"var(--label3)"}},customer.email)
         )
       )
-      ,React.createElement('div',{style:{background:"rgba(255,255,255,0.50)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",border:"1px solid rgba(255,255,255,0.40)",borderRadius:10,padding:"10px 12px",display:"flex",alignItems:"center",gap:8}}
+      ,React.createElement('div',{style:{background:"rgba(255,255,255,0.75)",backdropFilter:"blur(15px)",WebkitBackdropFilter:"blur(15px)",border:"1px solid rgba(255,255,255,0.60)",boxShadow:"0 8px 32px 0 rgba(0,0,0,0.12)",borderRadius:12,padding:"10px 12px",display:"flex",alignItems:"center",gap:8}}
         ,React.createElement('span',{style:{fontSize:18}},"🚗")
         ,React.createElement('span',{style:{fontSize:15,fontWeight:500}},`${customer.marke||""} ${customer.modell||""} · ${customer.kennzeichen||""}`)
         ,customer.km&&React.createElement('span',{style:{fontSize:13,color:"var(--label2)",marginLeft:"auto"}},`${Number(customer.km).toLocaleString()} km`)
@@ -1702,10 +1720,11 @@ function App(){
     (async()=>{
       try{
         const[cr,or,cnt,offr]=await Promise.all([db.get("customers",token),db.get("orders",token),db.getCounter(token),db.get("offerten",token).catch(()=>[])]);
-        setCustomers((Array.isArray(cr)?cr:[]).map(r=>r.data));
-        setOrders((Array.isArray(or)?or:[]).map(r=>r.data));
+        const parseRows=arr=>(Array.isArray(arr)?arr:[]).map(r=>r&&(r.data||(r.id?r:null))).filter(Boolean);
+        setCustomers(parseRows(cr));
+        setOrders(parseRows(or));
         setOrderNum(cnt);
-        const offs=(Array.isArray(offr)?offr:[]).map(r=>r.data).filter(Boolean);
+        const offs=parseRows(offr);
         setOfferten(offs);
         if(offs.length)setOffertNum(Math.max(...offs.map(o=>o.offertNumber||0)));
       }catch(e){console.error(e);}
@@ -1749,10 +1768,13 @@ function App(){
   async function addOfferte(data){
     const num=offertNum+1;
     const newOff={id:`off_${Date.now()}`,offertNumber:num,status:"entwurf",createdAt:new Date().toISOString(),...data};
-    try{
-      await syncOk(()=>db.upsert("offerten",{id:newOff.id,data:newOff},token));
-      setOfferten(p=>[...p,newOff]);setOffertNum(num);setShowNOff(false);
-    }catch(e){/* syncOk already showed alert */}
+    await syncOk(async()=>{
+      await db.upsert("offerten",{id:newOff.id,data:newOff},token);
+    });
+    // Only runs if syncOk succeeded (no throw)
+    setOfferten(p=>[...p,newOff]);
+    setOffertNum(num);
+    setShowNOff(false);
   }
   async function updateOfferte(upd){
     await syncOk(()=>db.upsert("offerten",{id:upd.id,data:upd},token));
