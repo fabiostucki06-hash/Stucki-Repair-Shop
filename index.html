@@ -582,6 +582,83 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
   font-family:inherit;
 }
 .excel-btn:hover{background:rgba(0,160,56,0.20);transform:scale(1.06)}
+/* ── TOAST NOTIFICATIONS ── */
+.toast-stack{
+  position:fixed;
+  bottom:calc(72px + env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);
+  z-index:600;
+  display:flex;flex-direction:column-reverse;gap:8px;
+  pointer-events:none;
+  width:min(92vw,360px);
+}
+.toast{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 16px;
+  background:rgba(28,28,34,0.90);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.11);
+  color:#fff;font-size:15px;font-weight:500;letter-spacing:-0.2px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.30);
+  pointer-events:auto;
+  animation:toast-in .34s cubic-bezier(.34,1.56,.64,1) both;
+}
+.toast.toast-out{animation:toast-out .22s ease forwards}
+.toast-success{border-color:rgba(52,199,89,.38)}
+.toast-error  {border-color:rgba(255,59,48,.38)}
+.toast-info   {border-color:rgba(0,122,255,.38)}
+.toast-icon   {font-size:18px;flex-shrink:0}
+.toast-msg    {flex:1;line-height:1.3}
+.toast-close  {background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 2px;transition:color .15s}
+.toast-close:hover{color:#fff}
+@keyframes toast-in {from{opacity:0;transform:translateY(14px) scale(0.93)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toast-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-8px) scale(0.96)}}
+
+/* ── DOCUMENT TYPE TABS (OfferteForm Arbeit/Material) ── */
+.doc-tab-bar{
+  display:flex;
+  background:rgba(255,255,255,0.38);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.62);
+  border-radius:14px;padding:4px;gap:4px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.70),0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom:16px;
+}
+.doc-tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  height:42px;border:none;border-radius:10px;
+  font-size:14px;font-weight:600;letter-spacing:-0.2px;
+  cursor:pointer;font-family:inherit;
+  transition:background .2s cubic-bezier(.25,.46,.45,.94),
+             color .15s,box-shadow .2s,border-color .15s;
+  background:transparent;color:var(--label2);
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.doc-tab:hover:not(.dt-active){
+  background:rgba(255,255,255,0.55);
+  color:var(--label);
+}
+.doc-tab.dt-active{
+  background:linear-gradient(to bottom,rgba(84,164,255,.95) 0%,rgba(0,122,255,.95) 50%,rgba(0,86,179,.95) 100%);
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.70),inset 0 -1px 2px rgba(0,0,0,.15),0 3px 8px rgba(0,0,0,.14);
+  border-color:#004fb0;
+  text-shadow:0 -1px 0 rgba(0,0,0,.25);
+}
+.doc-tab-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;border-radius:9px;
+  font-size:11px;font-weight:700;padding:0 5px;
+  background:rgba(0,0,0,0.10);transition:background .2s;
+}
+.doc-tab.dt-active .doc-tab-count{background:rgba(255,255,255,.24)}
+.doc-tab-count.has-items{background:rgba(0,0,0,0.18)}
+.doc-tab.dt-active .doc-tab-count.has-items{background:rgba(255,255,255,.32)}
+
 .excel-btn:active{opacity:0.65;transform:scale(0.96)}
 
 /* ══════════════════════════════════════════════════════
@@ -742,8 +819,7 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
 </head>
 <body>
 <div class="bg">
-  <!-- mac_wallpaper.png — PRIMARY BACKGROUND — replace path to wire up your asset -->
-  <img src="mac_wallpaper.png" alt="" style="object-position:center center">
+  <img src="https://xpggpkmqwescbcrnnpod.supabase.co/storage/v1/object/public/wallpaper/mac_wallpaper.png" alt="" style="object-position:center center">
 </div>
 <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
   <filter id="frosted" color-interpolation-filters="sRGB" primitiveUnits="objectBoundingBox">
@@ -1020,6 +1096,46 @@ function IPhoneHero(){
   );
 }
 
+/* ── TOAST SYSTEM ── */
+/* Global mutable store — no prop drilling needed */
+let _toastId=0;
+let _toastSetters=null;
+function ToastProvider({children}){
+  const[toasts,setToasts]=useState([]);
+  useEffect(()=>{_toastSetters=setToasts;return()=>{_toastSetters=null;};},[]);
+  function dismiss(id){
+    setToasts(ts=>ts.map(t=>t.id===id?{...t,out:true}:t));
+    setTimeout(()=>setToasts(ts=>ts.filter(t=>t.id!==id)),260);
+  }
+  return React.createElement(React.Fragment,null
+    ,children
+    ,React.createElement('div',{className:"toast-stack"}
+      ,toasts.map(t=>React.createElement('div',{
+          key:t.id,
+          className:`toast toast-${t.type}${t.out?" toast-out":""}`,
+          role:"status","aria-live":"polite"
+        }
+        ,React.createElement('span',{className:"toast-icon"},t.icon)
+        ,React.createElement('span',{className:"toast-msg"},t.msg)
+        ,React.createElement('button',{className:"toast-close",onClick:()=>dismiss(t.id),"aria-label":"Schließen"},"✕")
+      ))
+    )
+  );
+}
+function showToast(msg,type="info"){
+  if(!_toastSetters)return;
+  const id=++_toastId;
+  const icons={success:"✓",error:"✕",info:"ℹ"};
+  // Wait for re-render
+  setTimeout(()=>{
+    _toastSetters(ts=>[...ts,{id,msg,type,icon:icons[type]||icons.info,out:false}]);
+    setTimeout(()=>{
+      _toastSetters(ts=>ts.map(t=>t.id===id?{...t,out:true}:t));
+      setTimeout(()=>_toastSetters(ts=>ts.filter(t=>t.id!==id)),260);
+    },3600);
+  },0);
+}
+
 /* ── SPINNER ── */
 function Spinner({size=32,color="var(--blue)"}){
   return React.createElement('div',{style:{width:size,height:size,border:`3px solid var(--fill3)`,borderTopColor:color,borderRadius:"50%",animation:"spin 0.75s linear infinite"}});
@@ -1140,7 +1256,7 @@ function CustomerForm({initial,onSave,onCancel,saving}){
   const[f,setF]=useState(initial||{vorname:"",nachname:"",telefon:"",email:"",marke:"",modell:"",kennzeichen:"",km:""});
   const s=k=>v=>setF(p=>({...p,[k]:v}));
   function submit(){
-    if(!f.vorname.trim()||!f.nachname.trim()||!f.telefon.trim())return alert("Bitte Pflichtfelder ausfüllen.");
+    if(!f.vorname.trim()||!f.nachname.trim()||!f.telefon.trim()){showToast("Bitte Pflichtfelder ausfüllen","error");return;}
     onSave(f);
   }
   return React.createElement('div',null
@@ -1195,7 +1311,6 @@ function OfferteForm({customers,onSave,onCancel}){
   const[material,setMaterial]=useState([{beschreibung:"",menge:"1",stueckpreis:"",preis:""}]);
   const[notizen,setNotizen]=useState("");
   const[gueltigBis,setGueltigBis]=useState("");
-  const[saving,setSaving]=useState(false);
   const selectedCustomer=customers.find(c=>c.id===cid)||null;
   const addA=()=>setArbeit(a=>[...a,{beschreibung:"",ze:"",stundenansatz:"80",preis:"",zeKI:false,zeLoading:false,zeHint:""}]);
   const remA=i=>setArbeit(a=>a.filter((_,j)=>j!==i));
@@ -1228,17 +1343,20 @@ function OfferteForm({customers,onSave,onCancel}){
   const totA=arbeit.reduce((s,p)=>s+(parseFloat(p.preis)||0),0);
   const totM=material.reduce((s,p)=>s+(parseFloat(p.preis)||0),0);
   const totZE=arbeit.reduce((s,p)=>s+(parseFloat(p.ze)||0),0);
-  async function submit(){
-    if(!cid)return alert("Bitte Kunden wählen.");
+  function submit(){
+    if(!cid){showToast("Bitte einen Kunden auswählen","error");return;}
     const ap=arbeit.filter(p=>p.beschreibung.trim());
     const mp=material.filter(p=>p.beschreibung.trim());
-    if(!ap.length&&!mp.length)return alert("Mindestens eine Position eingeben.");
-    setSaving(true);
-    try{
-      await onSave({customerId:cid,titel,positionen:[...ap.map(p=>({...p,typ:"arbeit"})),...mp.map(p=>({...p,typ:"material"}))],notizen,gueltigBis,
-        totalBetrag:(totA+totM).toFixed(2),totalArbeit:totA.toFixed(2),totalMaterial:totM.toFixed(2),totalZE});
-    }catch(e){/* error shown by syncOk */}
-    finally{setSaving(false);}
+    if(!ap.length&&!mp.length){showToast("Mindestens eine Position eingeben","error");return;}
+    onSave({
+      customerId:cid,titel,
+      positionen:[...ap.map(p=>({...p,typ:"arbeit"})),...mp.map(p=>({...p,typ:"material"}))],
+      notizen,gueltigBis,
+      totalBetrag:(totA+totM).toFixed(2),
+      totalArbeit:totA.toFixed(2),
+      totalMaterial:totM.toFixed(2),
+      totalZE
+    });
   }
   const inp={display:"block",width:"100%",padding:"8px 0",background:"none",border:"none",outline:"none",fontSize:17,color:"var(--label)"};
   return React.createElement('div',null
@@ -1272,11 +1390,36 @@ function OfferteForm({customers,onSave,onCancel}){
       )
     )
 
-    /* Segmented control */
-    ,React.createElement('div',{style:{marginBottom:12}}
-      ,React.createElement('div',{className:"seg-ctrl",style:{width:"100%"}}
-        ,React.createElement('button',{className:"seg-item"+(tab==="arbeit"?" active":""),onClick:()=>setTab("arbeit"),style:{flex:1}},`Arbeit (${arbeit.filter(a=>a.beschreibung).length})`)
-        ,React.createElement('button',{className:"seg-item"+(tab==="material"?" active":""),onClick:()=>setTab("material"),style:{flex:1}},`Material (${material.filter(m=>m.beschreibung).length})`)
+    /* Document type tab bar */
+    ,React.createElement('div',{className:"doc-tab-bar"}
+      /* Arbeit tab — wrench icon */
+      ,React.createElement('button',{
+          className:"doc-tab"+(tab==="arbeit"?" dt-active":""),
+          onClick:()=>setTab("arbeit"),
+          "aria-pressed":tab==="arbeit"
+        }
+        ,React.createElement('svg',{width:15,height:15,viewBox:"0 0 15 15",fill:"none","aria-hidden":"true"}
+          ,React.createElement('path',{d:"M9.5 3.5a3.5 3.5 0 01-4.9 4.9L2 11a1.2 1.2 0 001.7 1.7L6.2 10A3.5 3.5 0 019.5 3.5zm.7-.7l-2 2 .8.8 2-2-.8-.8z",stroke:"currentColor",strokeWidth:1.2,strokeLinejoin:"round",strokeLinecap:"round"})
+        )
+        ,"Arbeit"
+        ,React.createElement('span',{className:`doc-tab-count${arbeit.filter(a=>a.beschreibung).length?" has-items":""}`}
+          ,arbeit.filter(a=>a.beschreibung).length
+        )
+      )
+      /* Material tab — box icon */
+      ,React.createElement('button',{
+          className:"doc-tab"+(tab==="material"?" dt-active":""),
+          onClick:()=>setTab("material"),
+          "aria-pressed":tab==="material"
+        }
+        ,React.createElement('svg',{width:15,height:15,viewBox:"0 0 15 15",fill:"none","aria-hidden":"true"}
+          ,React.createElement('rect',{x:2,y:4,width:11,height:9,rx:1.5,stroke:"currentColor",strokeWidth:1.2})
+          ,React.createElement('path',{d:"M5 4V3a2 2 0 014 0v1",stroke:"currentColor",strokeWidth:1.2,strokeLinecap:"round"})
+        )
+        ,"Material"
+        ,React.createElement('span',{className:`doc-tab-count${material.filter(m=>m.beschreibung).length?" has-items":""}`}
+          ,material.filter(m=>m.beschreibung).length
+        )
       )
     )
 
@@ -1366,7 +1509,7 @@ function OfferteForm({customers,onSave,onCancel}){
       ,React.createElement('textarea',{value:notizen,onChange:e=>setNotizen(e.target.value),placeholder:"Interne Notizen…",rows:3,
         style:{display:"block",width:"100%",padding:"11px 16px",background:"none",border:"none",outline:"none",fontSize:17,color:"var(--label)",resize:"vertical"}})
     )
-    ,React.createElement('button',{onClick:submit,disabled:saving,className:"btn-system",style:{marginBottom:12}},saving?React.createElement(Spinner,{size:20,color:"rgba(255,255,255,0.7)"}):"Offerte erstellen")
+    ,React.createElement('button',{onClick:submit,className:"btn-system",style:{marginBottom:12}},"Offerte erstellen")
     ,React.createElement('button',{onClick:onCancel,disabled:saving,className:"btn-system btn-secondary"},"Abbrechen")
   );
 }
@@ -1629,9 +1772,9 @@ function OrderForm({customers,customerId:preCid,onSave,onCancel,saving}){
   const updB=(i,v)=>setBs(p=>{const n=[...p];n[i]=v;return n;});
   const remB=i=>setBs(p=>p.filter((_,j)=>j!==i));
   function submit(){
-    if(!cid)return alert("Bitte Kunden wählen.");
+    if(!cid){showToast("Bitte einen Kunden auswählen","error");return;}
     const b=bs.filter(x=>x.trim());
-    if(!b.length)return alert("Mindestens eine Beanstandung eingeben.");
+    if(!b.length){showToast("Mindestens eine Beanstandung eingeben","error");return;}
     onSave({customerId:cid,beanstandungen:b,notizen});
   }
   const inp={display:"block",width:"100%",padding:"0",background:"none",border:"none",outline:"none",fontSize:17,color:"var(--label)"};
@@ -1990,8 +2133,29 @@ function App(){
   }
   async function syncOk(fn){
     setSyncStatus("saving");
-    try{await fn();setSyncStatus("ok");setTimeout(()=>setSyncStatus("idle"),2200);}
-    catch(e){console.error(e);setSyncStatus("error");alert("Fehler beim Speichern: "+((e&&e.message)||"Unbekannter Fehler"));throw e;}
+    try{
+      await fn();
+      setSyncStatus("ok");
+      setTimeout(()=>setSyncStatus("idle"),2200);
+    }catch(e){
+      console.error(e);
+      setSyncStatus("error");
+      showToast("Speichern fehlgeschlagen: "+((e&&e.message)||"Unbekannter Fehler"),"error");
+      throw e;
+    }
+  }
+  /* Fire-and-forget sync — closes UI immediately, shows toast on failure */
+  function syncBackground(fn,successMsg){
+    setSyncStatus("saving");
+    fn().then(()=>{
+      setSyncStatus("ok");
+      if(successMsg)showToast(successMsg,"success");
+      setTimeout(()=>setSyncStatus("idle"),2200);
+    }).catch(e=>{
+      console.error(e);
+      setSyncStatus("error");
+      showToast("Speichern fehlgeschlagen: "+((e&&e.message)||"Unbekannter Fehler"),"error");
+    });
   }
   async function addCustomer(data){
     const id=`c_${Date.now()}`;const newC={id,...data,createdAt:new Date().toISOString()};
@@ -2014,16 +2178,18 @@ function App(){
     setOrders(p=>p.map(o=>o.id===upd.id?upd:o));setSelO(upd);
     if(cp)await updateCustomer(upd.customerId,cp);
   }
-  async function addOfferte(data){
+  function addOfferte(data){
     const num=offertNum+1;
     const newOff={id:`off_${Date.now()}`,offertNumber:num,status:"entwurf",createdAt:new Date().toISOString(),...data};
-    await syncOk(async()=>{
-      await db.upsert("offerten",{id:newOff.id,data:newOff},token);
-    });
+    /* Optimistic update — UI responds instantly, sync happens in background */
     setOfferten(p=>[...p,newOff]);
     setOffertNum(num);
     setShowNOff(false);
     setTab("offerten");
+    syncBackground(
+      ()=>db.upsert("offerten",{id:newOff.id,data:newOff},token),
+      `Offerte #${num} gespeichert`
+    );
   }
   async function updateOfferte(upd){
     await syncOk(()=>db.upsert("offerten",{id:upd.id,data:upd},token));
@@ -2376,7 +2542,9 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App,null));
+ReactDOM.createRoot(document.getElementById("root")).render(
+  React.createElement(ToastProvider,null,React.createElement(App,null))
+);
 </script>
 </body>
 </html>
