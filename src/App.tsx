@@ -98,7 +98,7 @@ export default function App() {
         <img
           src={ASSETS.wallpaper}
           alt=""
-          style={{ objectPosition: 'center center' }}
+
           onError={(e) => {
             const img = e.currentTarget;
             if (!img.dataset.fb) { img.dataset.fb = '1'; img.src = '/mac_wallpaper.png'; }
