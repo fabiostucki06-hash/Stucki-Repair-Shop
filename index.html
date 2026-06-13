@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#F2F2F7"/>
-<title>GarageOS</title>
+<title>Stucki Repair</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
@@ -383,13 +383,28 @@ button{touch-action:manipulation;-webkit-font-smoothing:antialiased;font-family:
 }
 
 /* ── STATUS PILL COLORS ── */
-.status-aufnahme      {background:rgba(88,86,214,0.10);color:#5856D6}
-.status-offerte_versendet{background:rgba(255,149,0,0.10);color:#E07800}
-.status-offerte_bestaetigt{background:rgba(52,199,89,0.10);color:#248A3D}
-.status-teile_arbeit  {background:rgba(0,122,255,0.10);color:#007AFF}
-.status-zahlung_versendet{background:rgba(255,149,0,0.10);color:#E07800}
-.status-zahlung_erhalten{background:rgba(175,82,222,0.10);color:#9842C8}
-.status-abgeschlossen {background:rgba(110,110,115,0.10);color:var(--label2)}
+.status-offerte_erstellen  {background:rgba(88,86,214,0.12);color:#5856D6}
+.status-offerte_verschickt {background:rgba(255,149,0,0.12);color:#C07000}
+.status-arbeit             {background:rgba(0,122,255,0.12);color:#007AFF}
+.status-bezahlung          {background:rgba(255,59,48,0.10);color:#CC2200}
+.status-bezahlt            {background:rgba(52,199,89,0.12);color:#248A3D}
+
+/* ── STATUS TRACKER ── */
+.status-track{display:flex;align-items:flex-start;padding:4px 0 8px;gap:0}
+.status-track-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.status-track-connector{position:absolute;top:13px;left:50%;right:-50%;height:2px;z-index:0}
+.status-track-circle{
+  width:28px;height:28px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:1;
+  transition:background 0.3s ease,box-shadow 0.3s ease;
+  flex-shrink:0;
+}
+.status-track-label{
+  font-size:9.5px;font-weight:500;text-align:center;
+  margin-top:6px;line-height:1.25;max-width:52px;
+  letter-spacing:-0.05px;
+}
 
 
 /* ── ALERTS / BANNERS ── */
@@ -862,20 +877,18 @@ const db={
 
 /* ── CONSTANTS ── */
 const SC={
-  aufnahme:{label:"Aufnahme",short:"Aufnahme",sysColor:"indigo"},
-  offerte_versendet:{label:"Offerte versendet",short:"Offerte",sysColor:"orange"},
-  offerte_bestaetigt:{label:"Offerte bestätigt",short:"Bestätigt",sysColor:"green"},
-  teile_arbeit:{label:"Teile & Arbeit",short:"Arbeit",sysColor:"blue"},
-  zahlung_versendet:{label:"Zahlung versendet",short:"Zahlung",sysColor:"orange"},
-  zahlung_erhalten:{label:"Zahlung erhalten",short:"Bezahlt",sysColor:"purple"},
-  abgeschlossen:{label:"Abgeschlossen",short:"Fertig",sysColor:"gray"},
+  offerte_erstellen: {label:"Offerte erstellen",short:"Offerte",sysColor:"indigo"},
+  offerte_verschickt:{label:"Offerte verschickt",short:"Verschickt",sysColor:"orange"},
+  arbeit:            {label:"In Arbeit",short:"Arbeit",sysColor:"blue"},
+  bezahlung:         {label:"Bezahlung ausstehend",short:"Bezahlung",sysColor:"red"},
+  bezahlt:           {label:"Bezahlt",short:"Bezahlt",sysColor:"green"},
 };
-const SO=["aufnahme","offerte_versendet","offerte_bestaetigt","teile_arbeit","zahlung_versendet","zahlung_erhalten","abgeschlossen"];
+const SO=["offerte_erstellen","offerte_verschickt","arbeit","bezahlung","bezahlt"];
 const daysSince=d=>d?Math.floor((Date.now()-new Date(d).getTime())/86400000):0;
 const hoursSince=d=>d?Math.floor((Date.now()-new Date(d).getTime())/3600000):0;
 const isOverdue=o=>{
-  if(o.status==="offerte_versendet"&&hoursSince(o.statusChangedAt)>48)return true;
-  if(o.status==="zahlung_versendet"){const f=o.zahlungsFrist?parseInt(o.zahlungsFrist):30;if(daysSince(o.statusChangedAt)>f)return true;}
+  if(o.status==="offerte_verschickt"&&hoursSince(o.statusChangedAt)>48)return true;
+  if(o.status==="bezahlung"){const f=o.zahlungsFrist?parseInt(o.zahlungsFrist):30;if(daysSince(o.statusChangedAt)>f)return true;}
   return false;
 };
 const needsAttention=o=>o.status!=="abgeschlossen"&&isOverdue(o);
@@ -913,23 +926,18 @@ const SFXmark=()=>React.createElement('svg',{width:12,height:12,viewBox:"0 0 12 
 const SFCheckmark=()=>React.createElement('svg',{width:14,height:14,viewBox:"0 0 14 14",fill:"none"}
   ,React.createElement('path',{d:"M2 7l4 4 6-7",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"})
 );
-/* Store icon — stroke, rounded, no fill — icon_image.jpg design language */
-const SFStore=()=>React.createElement('svg',{width:25,height:25,viewBox:"0 0 25 25",fill:"none"}
-  ,React.createElement('rect',{x:3,y:7,width:19,height:15,rx:2.5,stroke:"currentColor",strokeWidth:1.5})
-  ,React.createElement('path',{d:"M7 7V6a5.5 5.5 0 0111 0v1",stroke:"currentColor",strokeWidth:1.5,strokeLinecap:"round"})
+const SFChart=()=>React.createElement('svg',{width:25,height:25,viewBox:"0 0 25 25",fill:"none"}
+  ,React.createElement('rect',{x:3,y:14,width:4,height:8,rx:1.5,stroke:"currentColor",strokeWidth:1.5})
+  ,React.createElement('rect',{x:10.5,y:9,width:4,height:13,rx:1.5,stroke:"currentColor",strokeWidth:1.5})
+  ,React.createElement('rect',{x:18,y:3,width:4,height:19,rx:1.5,stroke:"currentColor",strokeWidth:1.5})
 );
 const SFCloud=()=>React.createElement('svg',{width:24,height:20,viewBox:"0 0 26 22",fill:"none"}
   ,React.createElement('path',{d:"M7.5 18.5a6.5 6.5 0 01-.6-12.96A8.5 8.5 0 0120.5 10a5.5 5.5 0 010 8.5H7.5z",stroke:"currentColor",strokeWidth:1.7,strokeLinejoin:"round"})
   ,React.createElement('path',{d:"M13 21v-7M11 16.5l2-2 2 2",stroke:"currentColor",strokeWidth:1.7,strokeLinecap:"round",strokeLinejoin:"round"})
 );
 
-/* ══════════════════════════════════════════════════════
-   IPHONE HERO COMPONENT
-   Assets: mac_wallpaper.png (body::bg via .bg div), icon_image.jpg (icon style)
-   Font: "SF Pro Display" first — not system-ui as chosen face
-   Accent: #0071e3 exclusively
-══════════════════════════════════════════════════════ */
-function IPhoneHero(){
+/* ── STATUS TRACKER COMPONENT ── */
+function StatusTracker_PLACEHOLDER(){
   /* ── Apple nav bar (secondary, below GarageOS nav) ── */
   const appleNav=React.createElement('nav',{className:"ih-apple-nav",role:"navigation","aria-label":"Apple Store"}
     ,React.createElement('div',{className:"ih-apple-nav-inner"}
@@ -1088,11 +1096,55 @@ function IPhoneHero(){
     ,React.createElement('div',{className:"ih-label"},"Desert Titanium")
   );
 
-  return React.createElement('div',{style:{minHeight:"60vh"}}
-    ,appleNav
-    ,heroText
-    ,phonesRow
-    ,labelsRow
+  return null;
+}
+
+/* ── STATUS TRACKER ── */
+function StatusTracker({status}){
+  const ci=SO.indexOf(status);
+  const stepColors={
+    offerte_erstellen:"var(--indigo)",
+    offerte_verschickt:"var(--orange)",
+    arbeit:"var(--blue)",
+    bezahlung:"var(--red)",
+    bezahlt:"var(--green)",
+  };
+  return React.createElement('div',{style:{padding:"16px 20px",marginBottom:8}}
+    ,React.createElement('div',{className:"glass-panel",style:{padding:"18px 16px 14px"}}
+      ,React.createElement('div',{style:{fontSize:11,fontWeight:600,color:"var(--label2)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:14}},
+        "Auftragsstatus")
+      ,React.createElement('div',{style:{display:"flex",alignItems:"flex-start"}}
+        ,SO.map((s,i)=>{
+          const done=i<ci,active=i===ci;
+          const color=done||active?stepColors[s]:"rgba(0,0,0,0.15)";
+          return React.createElement('div',{key:s,style:{display:"flex",flexDirection:"column",alignItems:"center",flex:1}}
+            ,React.createElement('div',{style:{display:"flex",alignItems:"center",width:"100%"}}
+              ,i>0&&React.createElement('div',{style:{flex:1,height:2.5,borderRadius:2,background:done?"var(--blue)":"rgba(0,0,0,0.10)",transition:"background 0.4s ease"}})
+              ,React.createElement('div',{style:{
+                width:28,height:28,borderRadius:14,flexShrink:0,
+                background:done?"var(--blue)":active?stepColors[s]:"rgba(255,255,255,0.55)",
+                border:`2px solid ${done?"var(--blue)":active?stepColors[s]:"rgba(0,0,0,0.15)"}`,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                boxShadow:active?`0 0 0 4px ${stepColors[s]}33,0 3px 10px ${stepColors[s]}44`:"none",
+                transition:"all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+                backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",
+              }}
+                ,done
+                  ?React.createElement('svg',{width:12,height:12,viewBox:"0 0 12 12",fill:"none"},React.createElement('path',{d:"M2 6l3 3 5-5",stroke:"#fff",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round"}))
+                  :React.createElement('div',{style:{width:8,height:8,borderRadius:4,background:active?"#fff":"rgba(0,0,0,0.20)",transition:"background 0.3s"}})
+              )
+              ,i<SO.length-1&&React.createElement('div',{style:{flex:1,height:2.5,borderRadius:2,background:"rgba(0,0,0,0.10)"}})
+            )
+            ,React.createElement('div',{style:{
+              fontSize:9.5,fontWeight:active?700:500,marginTop:7,textAlign:"center",
+              maxWidth:54,lineHeight:1.3,letterSpacing:"-0.1px",
+              color:done?"var(--blue)":active?stepColors[s]:"var(--label3)",
+              transition:"color 0.3s ease",
+            }},SC[s].short)
+          );
+        })
+      )
+    )
   );
 }
 
@@ -1186,7 +1238,7 @@ function LoginPage({onLogin}){
             ,React.createElement('path',{d:"M24 10a9 9 0 01-12.7 12.7L5 29a3.5 3.5 0 005 5l6.3-6.3A9 9 0 0129 15l-5 5 3 3 5-5z",fill:"white"})
           )
         )
-        ,React.createElement('h1',{className:"sf-title1",style:{marginBottom:5,letterSpacing:"-0.5px"}},"GarageOS")
+        ,React.createElement('h1',{className:"sf-title1",style:{marginBottom:5,letterSpacing:"-0.5px"}},"Stucki Repair")
         ,React.createElement('p',{className:"sf-callout",style:{color:"var(--label2)"}},"Werkstatt Management")
       )
       ,error&&React.createElement('div',{className:"alert-banner alert-danger",style:{marginBottom:16}}
@@ -1311,6 +1363,7 @@ function OfferteForm({customers,onSave,onCancel}){
   const[material,setMaterial]=useState([{beschreibung:"",menge:"1",stueckpreis:"",preis:""}]);
   const[notizen,setNotizen]=useState("");
   const[gueltigBis,setGueltigBis]=useState("");
+  const[zahlungsFristOff,setZahlungsFristOff]=useState("30");
   const selectedCustomer=customers.find(c=>c.id===cid)||null;
   const addA=()=>setArbeit(a=>[...a,{beschreibung:"",ze:"",stundenansatz:"80",preis:"",zeKI:false,zeLoading:false,zeHint:""}]);
   const remA=i=>setArbeit(a=>a.filter((_,j)=>j!==i));
@@ -1351,7 +1404,7 @@ function OfferteForm({customers,onSave,onCancel}){
     onSave({
       customerId:cid,titel,
       positionen:[...ap.map(p=>({...p,typ:"arbeit"})),...mp.map(p=>({...p,typ:"material"}))],
-      notizen,gueltigBis,
+      notizen,gueltigBis,zahlungsFrist:zahlungsFristOff,
       totalBetrag:(totA+totM).toFixed(2),
       totalArbeit:totA.toFixed(2),
       totalMaterial:totM.toFixed(2),
@@ -1372,8 +1425,14 @@ function OfferteForm({customers,onSave,onCancel}){
       ,React.createElement('div',{style:{padding:"11px 16px",borderBottom:"0.33px solid var(--sep)"}}
         ,React.createElement('input',{value:titel,onChange:e=>setTitel(e.target.value),placeholder:"Titel / Betreff",style:inp})
       )
-      ,React.createElement('div',{style:{padding:"11px 16px"}}
-        ,React.createElement('input',{type:"date",value:gueltigBis,onChange:e=>setGueltigBis(e.target.value),style:inp})
+      ,React.createElement('div',{style:{padding:"11px 16px",borderBottom:"0.33px solid var(--sep)"}}
+        ,React.createElement('input',{type:"date",value:gueltigBis,onChange:e=>setGueltigBis(e.target.value),style:inp,placeholder:"Gültig bis"})
+      )
+      ,React.createElement('div',{style:{padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}
+        ,React.createElement('span',{style:{fontSize:15,color:"var(--label2)"}},"Zahlungsfrist (Tage)")
+        ,React.createElement('input',{type:"number",value:zahlungsFristOff,onChange:e=>setZahlungsFristOff(e.target.value),
+          min:1,placeholder:"30",
+          style:{background:"none",border:"none",outline:"none",fontSize:15,color:"var(--label)",textAlign:"right",width:60}})
       )
     )
 
@@ -1736,7 +1795,7 @@ function OfferteDetail({offerte,customer,onClose,onUpdate,onDelete}){
     ,offerte.gueltigBis&&React.createElement('div',{className:"sf-subhead",style:{color:isExpired?"var(--red)":"var(--label2)",marginBottom:12}},`Gültig bis: ${new Date(offerte.gueltigBis).toLocaleDateString("de-CH")}${isExpired?" (abgelaufen)":""}`)
     ,React.createElement('div',{style:{background:"rgba(52,199,89,0.09)",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:8,border:"0.5px solid rgba(52,199,89,0.22)"}}
       ,React.createElement('span',{style:{fontSize:16,color:"var(--green)"}},"✓")
-      ,React.createElement('span',{style:{fontSize:15,fontWeight:600,color:"var(--green)"}},"Zahlungsziel: 30 Tage netto")
+      ,React.createElement('span',{style:{fontSize:15,fontWeight:600,color:"var(--green)"}},`Zahlungsfrist: ${offerte.zahlungsFrist||30} Tage netto`)
     )
     /* Positionen */
     ,React.createElement('p',{className:"section-header"},"Positionen")
@@ -1857,7 +1916,7 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
     const upd={...order,status:ns,beanstandungen:bs.filter(x=>x.trim()),notizen,offertItems:items,offertBetrag:offB,rechnungsBetrag:recB,zahlungsFrist,statusChangedAt:new Date().toISOString()};
     await onUpdate(upd,null);setSaving(false);
   }
-  const showOffert=["offerte_bestaetigt","teile_arbeit","zahlung_versendet","zahlung_erhalten","abgeschlossen"].includes(status);
+  const showOffert=["arbeit","bezahlung","bezahlt"].includes(status);
   const inp2={display:"block",width:"100%",background:"var(--fill3)",border:"none",borderRadius:9,padding:"9px 12px",fontSize:16,color:"var(--label)",outline:"none"};
   return React.createElement(Sheet,{
     title:`Auftrag #${order.orderNumber}`,onClose,full:true,
@@ -1872,20 +1931,20 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
   }
     ,ov&&React.createElement('div',{className:"alert-banner alert-danger",style:{marginBottom:12}}
       ,React.createElement('span',null,"⚠\uFE0F")
-      ,React.createElement('span',{className:"sf-subhead"},status==="offerte_versendet"?"Offerte >48h ohne Antwort":"Zahlung überfällig")
+      ,React.createElement('span',{className:"sf-subhead"},status==="offerte_verschickt"?"Offerte >48h ohne Antwort":"Zahlung überfällig")
     )
-    /* Status row */
-    ,React.createElement('div',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:20}}
-      ,React.createElement(Badge,{status})
-      ,React.createElement('span',{style:{fontSize:13,color:"var(--label3)"}},d<1?`${hh} Std.`:`${d} Tage`)
-      ,saving&&React.createElement(Spinner,{size:16})
+    /* Status tracker */
+    ,React.createElement(StatusTracker,{status})
+    /* Status change pills */
+    ,React.createElement('div',{style:{padding:"0 16px 4px",display:"flex",alignItems:"center",gap:8,marginBottom:4}}
+      ,React.createElement('span',{style:{fontSize:12,fontWeight:600,color:"var(--label2)",textTransform:"uppercase",letterSpacing:"0.5px"}},
+        "Status ändern")
+      ,saving&&React.createElement(Spinner,{size:14})
     )
-    /* Status change */
-    ,React.createElement('p',{className:"section-header"},"Status")
-    ,React.createElement('div',{className:"h-scroll",style:{marginBottom:20}}
+    ,React.createElement('div',{className:"h-scroll",style:{padding:"0 16px",marginBottom:20}}
       ,SO.map(s=>React.createElement('button',{key:s,onClick:()=>saveStatus(s),disabled:saving,
         className:`pill-btn ${status===s?"pill-btn-active":"pill-btn-inactive"}`,
-        style:{opacity:saving?0.5:1}},SC[s].short))
+        style:{opacity:saving?0.5:1,whiteSpace:"nowrap"}},SC[s].short))
     )
     /* Customer */
     ,React.createElement('div',{className:"inset-grouped-list",style:{marginBottom:16}}
@@ -1986,17 +2045,17 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
       )
     )
     /* Zahlungsfrist */
-    ,edit&&(status==="zahlung_versendet"||status==="zahlung_erhalten")&&React.createElement(React.Fragment,null
+    ,edit&&(status==="bezahlung"||status==="bezahlt")&&React.createElement(React.Fragment,null
       ,React.createElement('p',{className:"section-header"},"Zahlungsfrist")
       ,React.createElement('div',{className:"form-section",style:{marginBottom:16}}
         ,React.createElement('div',{style:{padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}
           ,React.createElement('span',{style:{fontSize:16,color:"var(--label2)"}},"Zahlungsziel (Tage, Standard: 30)")
-          ,React.createElement('input',{type:"number",value:zahlungsFrist,onChange:e=>setZahlungsFrist(e.target.value),placeholder:"10",min:1,
+          ,React.createElement('input',{type:"number",value:zahlungsFrist,onChange:e=>setZahlungsFrist(e.target.value),placeholder:"30",min:1,
             style:{background:"none",border:"none",outline:"none",fontSize:16,color:"var(--label)",textAlign:"right",width:60}})
         )
       )
     )
-    ,!edit&&zahlungsFrist&&(status==="zahlung_versendet"||status==="zahlung_erhalten")&&(()=>{
+    ,!edit&&zahlungsFrist&&(status==="bezahlung"||status==="bezahlt")&&(()=>{
       const frist=parseInt(zahlungsFrist),vergangen=daysSince(order.statusChangedAt),verbl=frist-vergangen,abg=verbl<0;
       return React.createElement('div',{className:`alert-banner ${abg?"alert-danger":"alert-warning"}`,style:{marginBottom:16}}
         ,React.createElement('div',null
@@ -2008,7 +2067,7 @@ function OrderDetail({order,customer,onClose,onUpdate,onDelete}){
     /* Zahlungsziel */
     ,!edit&&React.createElement('div',{style:{background:"rgba(52,199,89,0.09)",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:8,border:"0.5px solid rgba(52,199,89,0.22)"}}
       ,React.createElement('span',{style:{fontSize:15,color:"var(--green)"}},"✓")
-      ,React.createElement('span',{style:{fontSize:15,fontWeight:600,color:"var(--green)"}},"Zahlungsziel: 30 Tage netto")
+      ,React.createElement('span',{style:{fontSize:15,fontWeight:600,color:"var(--green)"}},`Zahlungsfrist: ${zahlungsFrist||30} Tage netto`)
     )
     /* Notizen */
     ,edit?React.createElement(React.Fragment,null
@@ -2170,7 +2229,7 @@ function App(){
   }
   async function addOrder(data){
     const num=orderNum+1;
-    const newO={id:`o_${Date.now()}`,orderNumber:num,status:"aufnahme",statusChangedAt:new Date().toISOString(),createdAt:new Date().toISOString(),...data};
+    const newO={id:`o_${Date.now()}`,orderNumber:num,status:"offerte_erstellen",statusChangedAt:new Date().toISOString(),createdAt:new Date().toISOString(),...data};
     await syncOk(async()=>{await db.upsert("orders",{id:newO.id,data:newO},token);await db.setCounter(num,token);});
     setOrders(p=>[...p,newO]);setOrderNum(num);setShowNO(false);setNewOCid(null);setAfterSave(null);
   }
@@ -2211,7 +2270,7 @@ function App(){
   if(!authChecked)return React.createElement('div',{style:{minHeight:"100dvh",background:"transparent",display:"flex",alignItems:"center",justifyContent:"center"}},React.createElement(Spinner,{}));
   if(!token)return React.createElement(LoginPage,{onLogin:handleLogin});
 
-  const activeOrders=orders.filter(o=>o.status!=="abgeschlossen");
+  const activeOrders=orders.filter(o=>o.status!=="bezahlt");
   const todos=orders.filter(needsAttention);
   const filteredC=customers.filter(c=>{
     const q=search.toLowerCase();
@@ -2235,12 +2294,21 @@ function App(){
     ,React.createElement('div',{className:"nav-bar"}
       ,React.createElement('div',{className:"nav-bar-inner"}
         ,React.createElement('div',{style:{display:"flex",alignItems:"center",gap:10}}
-          ,React.createElement('img',{
-            src:"https://xpggpkmqwescbcrnnpod.supabase.co/storage/v1/object/public/logo/Gemini_Generated_Image_.png",
-            alt:"Werkstatt",
-            className:"werkstatt-logo",
-            style:{maxHeight:"48px",width:"auto",objectFit:"contain",filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.18))"}
-          })
+          ,React.createElement('div',{style:{
+            width:36,height:36,borderRadius:10,
+            background:"linear-gradient(145deg,#0A84FF,#0060CC)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            boxShadow:"0 3px 10px rgba(0,100,200,0.35),inset 0 1px 0 rgba(255,255,255,0.4)",
+            flexShrink:0,
+          }}
+            ,React.createElement('svg',{width:20,height:20,viewBox:"0 0 20 20",fill:"none"}
+              ,React.createElement('path',{d:"M12 4a7 7 0 01-9.9 9.9L1 15a2 2 0 002.8 2.8l1.1-1.1A7 7 0 0114 5.5l-2.5 2.5 1.5 1.5 2.5-2.5z",stroke:"#fff",strokeWidth:1.4,strokeLinejoin:"round",strokeLinecap:"round"})
+            )
+          )
+          ,React.createElement('div',null
+            ,React.createElement('div',{style:{fontSize:17,fontWeight:700,letterSpacing:"-0.5px",lineHeight:1.1,color:"var(--label)"}},"Stucki Repair")
+            ,React.createElement('div',{style:{fontSize:11,color:"var(--label2)",letterSpacing:"0.1px"}},"Werkstatt Management")
+          )
         )
         ,React.createElement('div',{style:{display:"flex",alignItems:"center",gap:12}}
           ,React.createElement('div',{
@@ -2259,7 +2327,8 @@ function App(){
       /* ── DASHBOARD ── */
       ,tab==="dashboard"&&React.createElement('div',null
         ,React.createElement('div',{style:{padding:"16px 16px 0",marginBottom:4}}
-          ,React.createElement('h1',{className:"sf-title1",style:{letterSpacing:"0.36px",paddingTop:8}},"Übersicht")
+          ,React.createElement('h1',{className:"sf-title1",style:{letterSpacing:"-0.5px",paddingTop:8}},"Übersicht")
+          ,React.createElement('p',{className:"sf-footnote",style:{color:"var(--label2)",marginTop:2}},"Stucki Repair · Werkstatt Management")
         )
         ,React.createElement('div',{style:{padding:"8px 16px"}}
           ,React.createElement('div',{className:"stat-grid"}
@@ -2267,7 +2336,7 @@ function App(){
               {label:"Kunden",v:customers.length,color:"var(--blue)",icon:"👤"},
               {label:"Aktive Aufträge",v:activeOrders.length,color:"var(--orange)",icon:"🔧"},
               {label:"Nachzuhaken",v:todos.length,color:"var(--red)",icon:"⚠\uFE0F"},
-              {label:"Abgeschlossen",v:orders.filter(o=>o.status==="abgeschlossen").length,color:"var(--green)",icon:"✅"},
+              {label:"Bezahlt",v:orders.filter(o=>o.status==="bezahlt").length,color:"var(--green)",icon:"✅"},
             ].map(s=>React.createElement('div',{key:s.label,className:"stat-card"}
               ,React.createElement('div',{className:"stat-icon"},s.icon)
               ,React.createElement('div',{className:"stat-number",style:{color:s.color}},s.v)
@@ -2283,7 +2352,7 @@ function App(){
                   ,React.createElement('div',{style:{flex:1}}
                     ,React.createElement('div',{style:{fontWeight:600,fontSize:16}},`${_optionalChain([c,'optionalAccess',x=>x.vorname])||""} ${_optionalChain([c,'optionalAccess',x=>x.nachname])||""}`)
                     ,React.createElement('div',{style:{fontSize:13,color:"var(--red)",fontWeight:600,marginTop:1}},
-                      o.status==="offerte_versendet"?`${hoursSince(o.statusChangedAt)} Std. ohne Antwort`:`${daysSince(o.statusChangedAt)} Tage offen`)
+                      o.status==="offerte_verschickt"?`${hoursSince(o.statusChangedAt)} Std. ohne Antwort`:`${daysSince(o.statusChangedAt)} Tage offen`)
                   )
                   ,React.createElement(Badge,{status:o.status,small:true})
                   ,React.createElement('span',{style:{color:"var(--label3)"}},React.createElement(SFChevron))
@@ -2357,7 +2426,7 @@ function App(){
       /* ── AUFTRÄGE ── */
       ,tab==="auftraege"&&React.createElement('div',{style:{padding:"16px 16px 0"}}
         ,React.createElement('h1',{className:"sf-title1",style:{marginBottom:12,paddingTop:8}},"Aufträge")
-        ,SO.filter(s=>s!=="abgeschlossen").map(s=>{
+        ,SO.filter(s=>s!=="bezahlt").map(s=>{
           const grp=orders.filter(o=>o.status===s).sort((a,b)=>{
             const ca=customers.find(x=>x.id===a.customerId),cb=customers.find(x=>x.id===b.customerId);
             const na=ca?`${ca.nachname} ${ca.vorname}`.toLowerCase():"zzz",nb=cb?`${cb.nachname} ${cb.vorname}`.toLowerCase():"zzz";
@@ -2386,15 +2455,15 @@ function App(){
           );
         })
         ,(()=>{
-          const done=orders.filter(o=>o.status==="abgeschlossen").sort((a,b)=>{
+          const done=orders.filter(o=>o.status==="bezahlt").sort((a,b)=>{
             const ca=customers.find(x=>x.id===a.customerId),cb=customers.find(x=>x.id===b.customerId);
             const na=ca?`${ca.nachname} ${ca.vorname}`.toLowerCase():"zzz",nb=cb?`${cb.nachname} ${cb.vorname}`.toLowerCase():"zzz";
             return na<nb?-1:na>nb?1:new Date(b.createdAt)-new Date(a.createdAt);
           });
           if(!done.length)return null;
           return React.createElement('details',{style:{marginBottom:8}}
-            ,React.createElement('summary',{style:{padding:"8px 0",cursor:"pointer",color:"var(--label2)",fontWeight:600,fontSize:15,listStyle:"none",userSelect:"none",display:"flex",alignItems:"center",gap:6}},
-              "▶",`Abgeschlossen (${done.length})`)
+            ,React.createElement('summary',{style:{padding:"8px 0",cursor:"pointer",color:"var(--green)",fontWeight:600,fontSize:15,listStyle:"none",userSelect:"none",display:"flex",alignItems:"center",gap:6}},
+              "▶",`Bezahlt (${done.length})`)
             ,React.createElement('div',{className:"inset-grouped-list",style:{marginTop:8}}
               ,done.map((o,idx)=>{
                 const c=customers.find(x=>x.id===o.customerId);
@@ -2415,9 +2484,6 @@ function App(){
         })()
         ,!orders.length&&React.createElement('div',{className:"glass-panel",style:{padding:"40px",textAlign:"center",color:"var(--label3)"}},"Noch keine Aufträge.")
       )
-
-      /* ── STORE (iPhone Hero) ── */
-      ,tab==="store"&&React.createElement(IPhoneHero,{})
 
       /* ── KUNDEN ── */
       ,tab==="kunden"&&React.createElement('div',null
@@ -2491,7 +2557,6 @@ function App(){
         {id:"__fab__",icon:null,label:null},
         {id:"offerten",icon:React.createElement(SFDoc),label:"Offerten"},
         {id:"kunden",icon:React.createElement(SFPerson),label:"Kunden"},
-        {id:"store",icon:React.createElement(SFStore),label:"Store"},
       ].map((item)=>{
         if(item.id==="__fab__")return React.createElement('div',{key:"fab",style:{flex:1,display:"flex",alignItems:"center",justifyContent:"center",paddingBottom:2}}
           ,React.createElement('button',{
